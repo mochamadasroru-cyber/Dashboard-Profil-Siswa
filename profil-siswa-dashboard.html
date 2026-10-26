@@ -76,7 +76,8 @@ const SECTIONS = [
     { k: "sakit", label: "Tidak hadir karena sakit", type: "num" },
     { k: "izin", label: "Tidak hadir karena izin", type: "num" },
     { k: "alfa", label: "Tidak hadir tanpa keterangan (alfa)", type: "num" },
-    { k: "terlambat", label: "Keterlambatan", placeholder: "mis. tidak ada / 3 kali" },
+    { k: "terlambat", label: "Keterlambatan (Frekuensi)", placeholder: "mis. tidak ada / 2 kali" },
+    { k: "tglTerlambat", label: "Tanggal & Bulan Keterlambatan (tanpa tahun)", placeholder: "mis. 12 September, 28 September", hint: "Keterangan tanggal dan bulan keterlambatan siswa tanpa tahun" },
     { k: "disiplinUmum", label: "Kedisiplinan secara umum", type: "rate" },
     { k: "catatanDisiplin", label: "Catatan kedisiplinan lainnya", area: true, wide: true } ] },
   { id: "kesimpulan", title: "6. Catatan Khusus untuk Kesimpulan", fields: [
@@ -846,7 +847,7 @@ STRUKTUR
   • sakit: doakan kesehatan Ananda dan ingatkan agar lebih menjaga kesehatannya sehingga dapat mengikuti pembelajaran dengan optimal.
   • izin: sampaikan dengan santun agar Ananda mengurangi izin dan lebih menjaga kehadirannya.
   • alfa: ingatkan agar Ananda lebih disiplin dalam kehadiran karena dikhawatirkan akan banyak materi pelajaran yang tertinggal.
-  Jika sakit, izin, dan alfa semuanya 0, apresiasi kehadiran penuh Ananda. Sertakan juga keterlambatan dan kedisiplinan umum bila ada datanya.
+  Jika sakit, izin, dan alfa semuanya 0, apresiasi kehadiran penuh Ananda. Sertakan juga keterlambatan dan kedisiplinan umum bila ada datanya. Bila ada data tanggal keterlambatan (tglTerlambat), sebutkan secara jelas tanggal dan bulannya tanpa tahun (mis. "pada tanggal 12 September dan 28 September"), serta sertakan motivasi santun agar Ananda senantiasa hadir tepat waktu di sekolah.
 - kesimpulan: 2–3 paragraf. Paragraf 1 mulai "Secara keseluruhan, Alhamdulillah ${sp} {{NAMA}} …" (apresiasi dan karakter menonjol). Lalu pencapaian terpenting. Paragraf terakhir mulai "Ke depannya, ${sp} diharapkan …" (hal yang perlu dikembangkan dan harapan). Rangkum dengan kalimat baru; jangan menyalin ulang daftar kegiatan, tanggal, atau rincian ibadah dari bagian lain.
 
 ATURAN FAKTA (WAJIB)
@@ -1008,12 +1009,22 @@ function generateSmartNarrative(s) {
   const iNum = parseInt(inp.izin, 10) || 0;
   const aNum = parseInt(inp.alfa, 10) || 0;
   const terlambat = inp.terlambat?.trim();
+  let tglTerlambat = inp.tglTerlambat?.trim() || "";
+  if (tglTerlambat) {
+    // Bersihkan jika ada tahun 4 digit (agar tetap tanpa tahun) dan rapikan
+    tglTerlambat = tglTerlambat.replace(/\b20\d{2}\b/g, "").replace(/\s+/g, " ").replace(/\s*,/g, ",").replace(/[.,]+$/, "").trim();
+  }
   const disUmum = inp.disiplinUmum?.trim() || "Baik";
   const catDis = inp.catatanDisiplin?.trim();
 
   let dis1 = `Dalam aspek kehadiran dan kedisiplinan, `;
+  const isNoLate = !terlambat || terlambat.toLowerCase() === "tidak ada" || terlambat === "0";
   if (sNum === 0 && iNum === 0 && aNum === 0) {
-    dis1 += `Alhamdulillah ${sp} ${pg} menunjukkan komitmen dan keteladanan yang sangat baik dengan mencatatkan kehadiran penuh (100%) tanpa sakit, izin, maupun alfa sepanjang periode ini.`;
+    if (isNoLate && !tglTerlambat) {
+      dis1 += `Alhamdulillah ${sp} ${pg} menunjukkan komitmen dan keteladanan yang sangat baik dengan mencatatkan kehadiran penuh (100%) tanpa sakit, izin, maupun alfa sepanjang periode ini, serta senantiasa hadir tepat waktu di sekolah tanpa catatan keterlambatan.`;
+    } else {
+      dis1 += `Alhamdulillah ${sp} ${pg} menunjukkan komitmen dan keteladanan yang sangat baik dengan mencatatkan kehadiran penuh (100%) tanpa sakit, izin, maupun alfa sepanjang periode ini.`;
+    }
   } else {
     const abs = [];
     if (sNum > 0) abs.push(`tidak hadir karena sakit sebanyak ${sNum} kali`);
@@ -1024,9 +1035,19 @@ function generateSmartNarrative(s) {
     if (iNum > 0) dis1 += `Diharapkan ke depannya ananda dapat memprioritaskan kehadiran di sekolah agar pembelajaran berlangsung berkesinambungan. `;
     if (aNum > 0) dis1 += `Ananda diingatkan agar lebih disiplin dan senantiasa hadir tepat waktu di sekolah. `;
   }
-  if (terlambat && terlambat.toLowerCase() !== "tidak ada" && terlambat !== "0") {
-    dis1 += ` Catatan keterlambatan ananda tercatat ${terlambat}.`;
+
+  const isLate = terlambat && terlambat.toLowerCase() !== "tidak ada" && terlambat !== "0" && terlambat !== "-";
+  if (isLate || tglTerlambat) {
+    const kaliStr = isLate ? (/^\d+$/.test(terlambat) ? `${terlambat} kali` : terlambat) : "";
+    if (kaliStr && tglTerlambat) {
+      dis1 += ` Adapun mengenai kedisiplinan waktu, ananda tercatat mengalami keterlambatan sebanyak ${kaliStr}, yaitu pada tanggal ${tglTerlambat}. Ke depannya, ananda diharapkan dapat mempersiapkan diri dan berangkat lebih awal agar senantiasa hadir tepat waktu di sekolah.`;
+    } else if (tglTerlambat) {
+      dis1 += ` Adapun mengenai kedisiplinan waktu, ananda tercatat mengalami keterlambatan pada tanggal ${tglTerlambat}. Ke depannya, ananda diharapkan dapat mempersiapkan diri dan berangkat lebih awal agar senantiasa hadir tepat waktu di sekolah.`;
+    } else {
+      dis1 += ` Adapun mengenai kedisiplinan waktu, catatan keterlambatan ananda tercatat ${kaliStr}. Ke depannya, ananda diharapkan dapat lebih memperhatikan ketepatan waktu hadir di sekolah.`;
+    }
   }
+
   if (disUmum) {
     dis1 += ` Secara umum, tingkat kepatuhan ananda terhadap tata tertib sekolah tergolong ${disUmum.toLowerCase()}.`;
   }
@@ -1652,7 +1673,7 @@ const CONTOH_SISWA = {
     catatanPengembangan: "Tingkatkan lagi kepercayaan diri", sholatWajib: "Baik", dhuha: "Baik", murojaah: "Baik", tahfiz: "Baik", shaum: "Baik",
     kegiatanKeagamaan: "Puasa sunnah", peranMuhadhoroh: "Belum ada", perluDibina: "Fokus saat pembelajaran dan kurangi bercanda berlebihan",
     prestasi: "Berkontribusi dalam memenangkan lomba display kelas dan juara 3 Praktek Sholat", lomba: "Praktek Sholat Subuh, Balon Dead Match",
-    tingkatLomba: "Antarkelas di sekolah", sakit: "1", izin: "0", alfa: "0", terlambat: "Tidak ada", disiplinUmum: "Baik", kelebihan: "Aktif",
+    tingkatLomba: "Antarkelas di sekolah", sakit: "1", izin: "0", alfa: "0", terlambat: "Tidak ada", tglTerlambat: "", disiplinUmum: "Baik", kelebihan: "Aktif",
     dikembangkan: "Harus lebih percaya diri dan berani menyampaikan pendapat", kegiatanSkip: [] },
   final: {},
 };
