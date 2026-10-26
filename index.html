@@ -22,7 +22,8 @@
     <div class="top-actions">
       <span class="save-state" id="saveState" aria-live="polite"></span>
       <button class="btn" id="btnKelas" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan kelas</span></button>
-      <button class="btn" id="btnTpl" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Desain PDF</span></button>
+      <button class="btn" id="btnUploadCanva" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Upload Desain Canva</span></button>
+      <button class="btn" id="btnTpl" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Koleksi Desain</span></button>
       <button class="btn" id="btnAllAI" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg><span>Tulis semua dengan AI</span></button>
       <button class="btn primary" id="btnZip" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Unduh semua (ZIP)</span></button>
     </div>
@@ -34,8 +35,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 "use strict";
+if (typeof pdfjsLib !== "undefined" && pdfjsLib.GlobalWorkerOptions) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
 const LOGO_SRC = "data:image/png;base64,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";
 
 /* ================= Konfigurasi form ================= */
@@ -344,12 +349,16 @@ function paragraphsOf(s) {
   const k = S.kelas, nama = s.nama || "";
   const list = [];
   const bulan = k.periode || "…", tahun = k.tahun || (k.tanggalCetak || "").slice(0, 4);
-  list.push({ cls: "salam", words: tokenize("Assalamu'alaikum Warahmatullahi Wabarakatuh.") });
-  list.push({ words: tokenize(`Salam hangat kami sampaikan kepada Ayah/Bunda Ananda ${nama}. Semoga Ayah/Bunda dan keluarga senantiasa diberikan kesehatan, keberkahan, serta selalu berada dalam lindungan Allah Swt.`) });
-  list.push({ words: tokenize(`Puji syukur ke hadirat Tuhan Yang Maha Esa atas segala rahmat-Nya sehingga proses pembelajaran dan kegiatan sekolah selama bulan ${bulan} dapat berjalan dengan baik. Tak lupa selawat dan salam kita haturkan kepada Nabi Muhammad SAW., beserta keluarga, sahabat, dan pengikutnya hingga akhir zaman.`) });
-  list.push({ words: tokenize(`Melalui profil kali ini, kami ingin menyampaikan perkembangan Ananda selama bulan ${bulan}${tahun ? " " + tahun : ""} berdasarkan pengamatan dan penilaian Bapak/Ibu guru selama kegiatan belajar dan aktivitas di sekolah.`) });
-  for (const p of PARA_SECTIONS) for (const t of (s.final?.[p.id] || [])) if (t.trim()) list.push({ words: tokenize(t, nama) });
-  list.push({ words: tokenize(`Demikian profil perkembangan ${sapaan()} ${nama} kami sampaikan. Terima kasih atas kerja sama dan dukungan Ayah/Bunda dalam mendampingi perkembangan ${sapaan()} di rumah.`) });
+  list.push({ sec: "_salam", idx: 0, cls: "salam", words: tokenize("Assalamu'alaikum Warahmatullahi Wabarakatuh.") });
+  list.push({ sec: "_intro1", idx: 0, words: tokenize(`Salam hangat kami sampaikan kepada Ayah/Bunda Ananda ${nama}. Semoga Ayah/Bunda dan keluarga senantiasa diberikan kesehatan, keberkahan, serta selalu berada dalam lindungan Allah Swt.`) });
+  list.push({ sec: "_intro2", idx: 0, words: tokenize(`Puji syukur ke hadirat Tuhan Yang Maha Esa atas segala rahmat-Nya sehingga proses pembelajaran dan kegiatan sekolah selama bulan ${bulan} dapat berjalan dengan baik. Tak lupa selawat dan salam kita haturkan kepada Nabi Muhammad SAW., beserta keluarga, sahabat, dan pengikutnya hingga akhir zaman.`) });
+  list.push({ sec: "_intro3", idx: 0, words: tokenize(`Melalui profil kali ini, kami ingin menyampaikan perkembangan Ananda selama bulan ${bulan}${tahun ? " " + tahun : ""} berdasarkan pengamatan dan penilaian Bapak/Ibu guru selama kegiatan belajar dan aktivitas di sekolah.`) });
+  for (const p of PARA_SECTIONS) {
+    (s.final?.[p.id] || []).forEach((t, idx) => {
+      if (t.trim()) list.push({ sec: p.id, idx, words: tokenize(t, nama) });
+    });
+  }
+  list.push({ sec: "_outro", idx: 0, words: tokenize(`Demikian profil perkembangan ${sapaan()} ${nama} kami sampaikan. Terima kasih atas kerja sama dan dukungan Ayah/Bunda dalam mendampingi perkembangan ${sapaan()} di rumah.`) });
   return list;
 }
 function closingHtml() {
@@ -371,12 +380,12 @@ async function buildPages(s, stage, tplIn) {
   } else {
     [l1, l2] = await Promise.all([renderLayer(tpl, "first", s), renderLayer(tpl, "next", s)]);
   }
-  const b1 = bodyBox(tpl, "first"), b2 = bodyBox(tpl, "next");
+  const b1 = bodyBox(tpl, "first", s), b2 = bodyBox(tpl, "next", s);
   stage.innerHTML = "";
   const pages = [];
   const newPage = () => {
     const first = !pages.length, b = first ? b1 : b2;
-    const pg = h(`<div class="pg${tpl.builtin ? "" : " custom"}" style="${typoVars(tpl)}"><img class="${tpl.builtin ? "pg-head" : "pg-layer"}" src="${first ? l1 : l2}" alt="">
+    const pg = h(`<div class="pg${tpl.builtin ? "" : " custom"}" style="${typoVars(tpl, s)}"><img class="${tpl.builtin ? "pg-head" : "pg-layer"}" src="${first ? l1 : l2}" alt="">
       <div class="pg-body" style="left:${b.x * PXMM}px;top:${b.y * PXMM}px;width:${b.w * PXMM}px;height:${b.h * PXMM}px"><div class="pg-flow"></div></div></div>`);
     stage.append(pg); pages.push(pg); return pg;
   };
@@ -390,6 +399,7 @@ async function buildPages(s, stage, tplIn) {
       const el = document.createElement("p");
       if (para.cls) el.className = para.cls;
       if (cont) el.classList.add("cont");
+      if (para.sec) { el.dataset.sec = para.sec; el.dataset.idx = para.idx; }
       el.innerHTML = tokensHtml(words); flow.append(el);
       if (fits()) break;
       // cari jumlah kata terbanyak yang muat di sisa halaman ini
@@ -488,9 +498,25 @@ async function resolveTpl(meta) {
   const [f, n] = await Promise.all([meta.bg?.first ? getTplImage(`${meta.id}_first`) : null, meta.bg?.next ? getTplImage(`${meta.id}_next`) : null]);
   return { ...meta, bgFirstSrc: f, bgNextSrc: n };
 }
-function bodyBox(tpl, page) { return tpl.els.find((e) => e.kind === "body" && e.page === page) || BUILTIN.els[0]; }
-function typoVars(tpl) {
-  const b = { ...DEFAULT_BODY, ...(tpl.body || {}) };
+function bodyBox(tpl, page, s) {
+  const base = (tpl.els || []).find((e) => e.kind === "body" && e.page === page) || BUILTIN.els[page === "first" ? 0 : 1] || BUILTIN.els[0];
+  const b = { ...base };
+  const ov = s?.layout || {};
+  if (page === "first") {
+    if (ov.firstTopMm != null) b.y = ov.firstTopMm;
+    if (ov.firstHeightMm != null) b.h = ov.firstHeightMm;
+    if (ov.firstLeftMm != null) b.x = ov.firstLeftMm;
+    if (ov.firstWidthMm != null) b.w = ov.firstWidthMm;
+  } else {
+    if (ov.nextTopMm != null) b.y = ov.nextTopMm;
+    if (ov.nextHeightMm != null) b.h = ov.nextHeightMm;
+    if (ov.nextLeftMm != null) b.x = ov.nextLeftMm;
+    if (ov.nextWidthMm != null) b.w = ov.nextWidthMm;
+  }
+  return b;
+}
+function typoVars(tpl, s) {
+  const b = { ...DEFAULT_BODY, ...(tpl.body || {}), ...(s?.layout?.body || {}) };
   return `--font:'${b.font}';--fs:${(b.sizePt * 4 / 3).toFixed(2)}px;--lh:${b.lineHeight};--ind:${(b.indentMm * PXMM).toFixed(1)}px;--gap:${(b.gapMm * PXMM).toFixed(1)}px;--col:${b.color}`;
 }
 async function ensureFonts(tpl) {
@@ -553,6 +579,44 @@ async function fitBackground(file) {
     if (d.length < 245000) return d;
   }
   throw new Error("Gambar terlalu besar. Ekspor ulang dari Canva sebagai PNG/JPG ukuran A4.");
+}
+async function extractCanvaDesign(file) {
+  if (file.type === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf")) {
+    if (typeof pdfjsLib === "undefined") throw new Error("Library pembaca PDF belum siap. Mohon periksa koneksi internet.");
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    const count = pdf.numPages;
+    if (count < 1) throw new Error("File PDF tidak memiliki halaman.");
+
+    const renderPage = async (pageNo) => {
+      const page = await pdf.getPage(pageNo);
+      const vp = page.getViewport({ scale: 1 });
+      const scale = 1588 / vp.width;
+      const svp = page.getViewport({ scale });
+      const cv = document.createElement("canvas");
+      cv.width = Math.round(svp.width);
+      cv.height = Math.round(svp.height);
+      const ctx = cv.getContext("2d");
+      await page.render({ canvasContext: ctx, viewport: svp }).promise;
+
+      for (const q of [0.85, 0.75, 0.65, 0.55]) {
+        const d = cv.toDataURL("image/jpeg", q);
+        if (d.length < 245000) return d;
+      }
+      const c2 = document.createElement("canvas");
+      c2.width = Math.round(cv.width * 0.8);
+      c2.height = Math.round(cv.height * 0.8);
+      c2.getContext("2d").drawImage(cv, 0, 0, c2.width, c2.height);
+      return c2.toDataURL("image/jpeg", 0.75);
+    };
+
+    const first = await renderPage(1);
+    const next = count >= 2 ? await renderPage(2) : null;
+    return { first, next, isPdf: true, pageCount: count };
+  } else {
+    const first = await fitBackground(file);
+    return { first, next: null, isPdf: false, pageCount: 1 };
+  }
 }
 
 /* ================= PDF ================= */
@@ -687,19 +751,163 @@ function warningsFor(s) {
   return w;
 }
 
+/* ================= Modal: Upload Desain Canva ================= */
+async function openUploadCanvaModal() {
+  await loadTemplates();
+  const defName = `Desain ${S.kelas?.periode || "Bulanan"} ${S.kelas?.tahun || (S.kelas?.tanggalCetak || "").slice(0, 4) || new Date().getFullYear()}`;
+  let extracted = null;
+
+  const el = h(`<div class="overlay" role="dialog" aria-modal="true" aria-label="Upload Desain Canva">
+    <div class="dialog" style="width:min(580px,100%);max-height:calc(100vh - 32px);overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px">
+        <div>
+          <h3 style="margin:0 0 4px">🎨 Upload Desain Baru Canva</h3>
+          <p style="margin:0;font-size:13px;color:var(--muted)">Ganti desain profil siswa setiap bulan. Unggah file PDF Canva (otomatis 2 halaman) atau gambar PNG/JPG ukuran A4.</p>
+        </div>
+        <button class="btn sm ghost" id="upClose">✕</button>
+      </div>
+
+      <div class="canva-dropzone" id="canvaDrop">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);margin-bottom:8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div style="font-weight:700;font-size:14px;color:var(--fg-heading);margin-bottom:4px">Klik atau Seret File Canva ke Sini</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px">Format: <b>PDF Canva (Otomatis 2 Halaman)</b>, PNG, atau JPG (A4 210 × 297 mm)</div>
+        <span class="btn sm primary file-btn" style="position:relative">
+          Pilih File Desain
+          <input type="file" id="canvaFile" accept="application/pdf,image/png,image/jpeg" style="position:absolute;inset:0;opacity:0;cursor:pointer">
+        </span>
+      </div>
+
+      <div id="canvaLoading" style="display:none;padding:24px;text-align:center;color:var(--accent);font-weight:600">
+        <div class="loading-spin" style="margin:0 auto 8px"></div>
+        <span>Sedang membaca dan memproses file desain Canva…</span>
+      </div>
+
+      <div id="canvaPreview" style="display:none;margin-top:16px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--fg)">Pratinjau Desain Terbaca:</div>
+        <div class="canva-thumbs" id="canvaThumbs"></div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+        <div class="f">
+          <label for="canvaName">Nama Desain</label>
+          <input type="text" id="canvaName" value="${esc(defName)}" placeholder="mis. Desain Oktober 2026">
+        </div>
+        <div class="checks">
+          <label><input type="checkbox" id="canvaSetActive" checked> <span>Gunakan langsung sebagai desain aktif kelas ini</span></label>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn" id="upCancel">Batal</button>
+        <button class="btn primary" id="upSubmit" disabled>Pasang Desain Ini</button>
+      </div>
+    </div>
+  </div>`);
+
+  document.body.append(el);
+  const close = () => el.remove();
+  $("#upClose", el).onclick = close;
+  $("#upCancel", el).onclick = close;
+
+  const drop = $("#canvaDrop", el);
+  const fileInp = $("#canvaFile", el);
+  const loading = $("#canvaLoading", el);
+  const preview = $("#canvaPreview", el);
+  const thumbs = $("#canvaThumbs", el);
+  const submitBtn = $("#upSubmit", el);
+
+  const handleFile = async (file) => {
+    if (!file) return;
+    drop.style.display = "none";
+    loading.style.display = "block";
+    preview.style.display = "none";
+    submitBtn.disabled = true;
+
+    try {
+      extracted = await extractCanvaDesign(file);
+      loading.style.display = "none";
+      preview.style.display = "block";
+      submitBtn.disabled = false;
+
+      thumbs.innerHTML = `
+        <div class="canva-thumb-card">
+          <div class="canva-thumb-img" style="background-image:url('${extracted.first}')"></div>
+          <div class="canva-thumb-tag">Halaman 1 (Utama)</div>
+        </div>
+        ${extracted.next ? `
+        <div class="canva-thumb-card">
+          <div class="canva-thumb-img" style="background-image:url('${extracted.next}')"></div>
+          <div class="canva-thumb-tag">Halaman 2 (Lanjutan)</div>
+        </div>` : `
+        <div class="canva-thumb-card">
+          <div class="canva-thumb-img" style="background-image:url('${extracted.first}');opacity:0.6"></div>
+          <div class="canva-thumb-tag">Halaman Lanjutan (Duplikat)</div>
+        </div>`}
+      `;
+    } catch (err) {
+      loading.style.display = "none";
+      drop.style.display = "flex";
+      toast("Gagal membaca file: " + err.message, 5000);
+    }
+  };
+
+  fileInp.onchange = () => handleFile(fileInp.files?.[0]);
+  drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("dragover"); };
+  drop.ondragleave = () => drop.classList.remove("dragover");
+  drop.ondrop = (e) => {
+    e.preventDefault();
+    drop.classList.remove("dragover");
+    handleFile(e.dataTransfer.files?.[0]);
+  };
+
+  submitBtn.onclick = async () => {
+    if (!extracted) return;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Menyimpan…";
+
+    try {
+      const tpl = newTemplate();
+      tpl.nama = $("#canvaName", el).value.trim() || defName;
+      const imgs = { first: extracted.first, next: extracted.next || extracted.first };
+      const saved = await saveTemplate(tpl, imgs);
+
+      const setActive = $("#canvaSetActive", el).checked;
+      if (setActive && S.kelas) {
+        S.kelas.templateId = saved.id;
+        queueSave("kelas");
+      }
+      close();
+      render();
+      toast(`🎉 Desain "${saved.nama}" berhasil disimpan${setActive ? " dan dipasang!" : "."}`);
+      if (S.sel) {
+        S.tab = "pratinjau";
+        renderWork();
+      }
+    } catch (e) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Pasang Desain Ini";
+      toast("Gagal menyimpan: " + (e.message || e.code), 5000);
+    }
+  };
+}
+
 /* ================= Menu Desain PDF ================= */
 async function openTemplates() {
   await loadTemplates();
   const el = h(`<div class="overlay" role="dialog" aria-modal="true" aria-label="Desain PDF"><div class="dialog" style="width:min(820px,100%);max-height:calc(100vh - 32px);overflow:auto">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-      <div><h3>Desain PDF</h3><p style="margin:0">Pilih desain untuk kelas ini, atau unggah desain baru dari Canva. Isi paragraf otomatis dirapikan mengikuti area teks desain.</p></div>
+      <div><h3>Koleksi Desain Dokumen</h3><p style="margin:0">Pilih desain aktif untuk kelas ini, atau unggah desain baru dari Canva setiap bulan.</p></div>
       <button class="btn" id="tClose">Tutup</button></div>
     <div class="tpl-list" id="tList"></div>
-    <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn primary" id="tNew">+ Desain baru dari Canva</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:16px">
+      <button class="btn primary" id="tUploadCanva"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>+ Upload Desain Canva (PDF / Gambar)</span></button>
+      <button class="btn" id="tNew">+ Desain Manual (Editor)</button>
+    </div>
   </div></div>`);
   document.body.append(el);
   const close = () => el.remove();
   $("#tClose", el).onclick = close;
+  $("#tUploadCanva", el).onclick = () => { close(); openUploadCanvaModal(); };
   $("#tNew", el).onclick = () => { close(); openEditor(newTemplate(), true); };
   const list = $("#tList", el);
   const card = (t) => {
@@ -820,7 +1028,7 @@ function openEditor(t, isNew) {
 
   function bgBlock(key, title, hint) {
     return `<div class="photo"><div class="thumb ${imgs[key] ? "has" : ""}" style="width:52px;height:74px;${imgs[key] ? `background-image:url('${imgs[key]}')` : ""}"></div>
-      <div class="meta"><span>${title}</span><span class="hint">${hint}</span><span style="display:flex;gap:6px"><span class="btn sm file-btn">Unggah<input type="file" accept="image/png,image/jpeg" data-bg="${key}" aria-label="${title}"></span>${imgs[key] ? `<button class="btn sm ghost" data-bgclr="${key}">Hapus</button>` : ""}</span></div></div>`;
+      <div class="meta"><span>${title}</span><span class="hint">${hint}</span><span style="display:flex;gap:6px"><span class="btn sm file-btn">Unggah<input type="file" accept="image/png,image/jpeg,application/pdf" data-bg="${key}" aria-label="${title}"></span>${imgs[key] ? `<button class="btn sm ghost" data-bgclr="${key}">Hapus</button>` : ""}</span></div></div>`;
   }
   function propsHtml(e) {
     if (!e) return `<p class="hint" style="margin:0">Klik kotak di halaman untuk mengatur posisinya.</p>`;
@@ -848,9 +1056,9 @@ function openEditor(t, isNew) {
       <div class="ed-help"><strong>Cara menyiapkan desain di Canva</strong><ol>
         <li>Buat desain ukuran A4 (210 × 297 mm), 2 halaman: halaman pertama dan halaman lanjutan.</li>
         <li>Kosongkan bagian nama siswa, kelas, foto siswa, dan isi paragraf. Bagian itu diisi otomatis dari sini.</li>
-        <li>Bagikan → Unduh → PNG, lalu unggah tiap halaman di bawah ini.</li></ol></div>
+        <li>Bagikan → Unduh → PDF atau PNG, lalu unggah di bawah ini.</li></ol></div>
       <div><h4>Gambar latar</h4><div style="display:flex;flex-direction:column;gap:10px">
-        ${bgBlock("first", "Halaman pertama", "Desain dengan judul/kepala")}
+        ${bgBlock("first", "Halaman pertama", "Desain dengan judul/kepala (bisa PDF)")}
         ${bgBlock("next", "Halaman lanjutan", "Kosong = pakai halaman pertama")}</div></div>
       <div><h4>Halaman yang diatur</h4><div class="seg" role="group" aria-label="Halaman"><button data-pg="first" aria-pressed="${page === "first"}">Halaman pertama</button><button data-pg="next" aria-pressed="${page === "next"}">Halaman lanjutan</button></div></div>
       <div><h4>Elemen di halaman ini</h4><div class="el-list">${els().map((x) => `<button class="el-item" data-sel="${x.id}" aria-current="${x.id === sel}"><span class="sw" style="background:${x.kind === "body" ? "#1f8a5b" : "#6d3fe0"}"></span>${esc(label(x))}</button>`).join("")}</div>
@@ -875,10 +1083,23 @@ function openEditor(t, isNew) {
     side.querySelectorAll("[data-bg]").forEach((inp) => inp.onchange = async () => {
       const file = inp.files?.[0]; if (!file) return;
       try {
-        const d = await fitBackground(file); imgs[inp.dataset.bg] = d; changed[inp.dataset.bg] = true;
-        const im = await loadImg(d); if (im && Math.abs(im.height / im.width - 297 / 210) > 0.04) toast("Ukuran gambar bukan A4, jadi akan sedikit direnggangkan. Sebaiknya ekspor dari desain A4.", 5000);
+        $("#edState", ed).textContent = "Memproses…";
+        const res = await extractCanvaDesign(file);
+        if (res.isPdf) {
+          imgs.first = res.first; changed.first = true;
+          if (res.next) { imgs.next = res.next; changed.next = true; }
+          toast(res.next ? "PDF Canva 2 halaman berhasil dimuat!" : "PDF Canva 1 halaman dimuat!");
+        } else {
+          imgs[inp.dataset.bg] = res.first; changed[inp.dataset.bg] = true;
+          const im = await loadImg(res.first);
+          if (im && Math.abs(im.height / im.width - 297 / 210) > 0.04) toast("Ukuran gambar bukan A4, jadi akan sedikit direnggangkan. Sebaiknya ekspor dari desain A4.", 5000);
+        }
+        $("#edState", ed).textContent = "";
         repaint();
-      } catch (er) { toast(er.message); }
+      } catch (er) {
+        $("#edState", ed).textContent = "";
+        toast("Gagal memuat: " + er.message);
+      }
     });
     side.querySelectorAll("[data-bgclr]").forEach((bt) => bt.onclick = () => { imgs[bt.dataset.bgclr] = null; changed[bt.dataset.bgclr] = true; repaint(); });
     side.querySelectorAll("[data-p]").forEach((inp) => {
@@ -952,6 +1173,7 @@ function render() {
   const main = $("#main");
   const hasKelas = !!S.kelas;
   $("#btnKelas").hidden = !hasKelas;
+  $("#btnUploadCanva").hidden = !hasKelas;
   $("#btnTpl").hidden = !hasKelas;
   $("#btnAllAI").hidden = !hasKelas || !S.students.length;
   $("#btnAllAI").disabled = !sample;
@@ -1154,23 +1376,375 @@ function renderParas(body, s) {
   });
 }
 
-/* ================= Tab: Pratinjau ================= */
-async function renderPreview(body, s) {
-  body.replaceChildren(h(`<div class="preview-wrap"><div class="pv-count"><span>Menyusun halaman…</span></div></div>`));
-  const wrap = $(".preview-wrap", body);
+/* ================= Tab: Pratinjau & Rapikan Tata Letak ================= */
+let pvShowLayout = false;
+let pvLiveEdit = false;
+
+async function autoFitLayout(s) {
+  const tpl = await resolveTpl(activeTplMeta());
   const stage = document.createElement("div"); stage.style.cssText = "position:fixed;left:0;top:0;z-index:-10;pointer-events:none;opacity:0;";
   document.body.append(stage);
+
   try {
-    const pages = await buildPages(s, stage);
-    if (!body.isConnected) return;
-    const avail = Math.min(wrap.clientWidth - 32, 794), sc = avail / 794;
-    wrap.replaceChildren(h(`<div class="pv-count"><span>${pages.length} halaman A4</span><span>${statusOf(s) === "siap" ? "" : "Paragraf belum diisi"}</span></div>`));
-    for (const pg of pages) {
-      const slot = h(`<div class="pv-slot" style="width:${794 * sc}px;height:${1123 * sc}px"></div>`);
-      pg.classList.add("pv-page"); pg.style.transform = `scale(${sc})`; slot.append(pg); wrap.append(slot);
+    const pages = await buildPages(s, stage, tpl);
+    const currentCount = pages.length;
+    if (currentCount <= 1) {
+      toast("Dokumen sudah muat dalam 1 halaman.");
+      return;
     }
-  } catch (e) { wrap.replaceChildren(h(`<div class="notice bad">Pratinjau gagal: ${esc(e.message || e)}</div>`)); }
-  finally { stage.remove(); }
+
+    const targetCount = currentCount - 1;
+    const currentBody = { ...DEFAULT_BODY, ...(tpl.body || {}), ...(s.layout?.body || {}) };
+    let bestSize = currentBody.sizePt;
+    let bestGap = currentBody.gapMm;
+    let success = false;
+
+    for (let sz = currentBody.sizePt - 0.2; sz >= 8.0; sz -= 0.2) {
+      for (let gp = currentBody.gapMm; gp >= Math.max(1.5, currentBody.gapMm - 1.5); gp -= 0.3) {
+        const testLayout = {
+          ...(s.layout || {}),
+          body: { ...currentBody, sizePt: Math.round(sz * 10) / 10, gapMm: Math.round(gp * 10) / 10 }
+        };
+        const testStu = { ...s, layout: testLayout };
+        const testPages = await buildPages(testStu, stage, tpl);
+        if (testPages.length <= targetCount) {
+          bestSize = Math.round(sz * 10) / 10;
+          bestGap = Math.round(gp * 10) / 10;
+          success = true;
+          break;
+        }
+      }
+      if (success) break;
+    }
+
+    if (success) {
+      s.layout = s.layout || {};
+      s.layout.body = { ...currentBody, sizePt: bestSize, gapMm: bestGap };
+      touch(s);
+      const body = $("#tabBody");
+      if (body) renderPreview(body, s);
+      toast(`✨ Berhasil! Font disesuaikan ke ${bestSize}pt agar pas ${targetCount} halaman.`);
+    } else {
+      toast("Teks terlalu panjang untuk dipas-kan otomatis. Coba kurangi sedikit kalimat di tab Paragraf atau tinggikan area teks.");
+    }
+  } catch (e) {
+    toast("Auto-fit gagal: " + (e.message || e));
+  } finally {
+    stage.remove();
+  }
+}
+
+async function renderPreview(body, s) {
+  const tpl = await resolveTpl(activeTplMeta());
+  const curBody = { ...DEFAULT_BODY, ...(tpl.body || {}), ...(s.layout?.body || {}) };
+  const curBox1 = bodyBox(tpl, "first", s);
+  const curBox2 = bodyBox(tpl, "next", s);
+
+  body.replaceChildren(h(`<div class="preview-wrap">
+    <div class="pv-toolbar">
+      <div class="pv-info">
+        <span class="pv-pages-badge" id="pvPageBadge">📄 Menyusun halaman…</span>
+        <span class="pv-status-chip" id="pvStatusChip"></span>
+      </div>
+      <div class="pv-actions">
+        <button class="btn sm" id="btnAutoFit" title="Kecilkan font sedikit secara otomatis agar pas tanpa baris menggantung">⚡ Auto-Fit Halaman</button>
+        <button class="btn sm ${pvShowLayout ? "active" : ""}" id="btnToggleLayout" aria-expanded="${pvShowLayout}">📐 Rapikan Tata Letak</button>
+        <button class="btn sm ${pvLiveEdit ? "active" : ""}" id="btnLiveEdit" aria-pressed="${pvLiveEdit}">${pvLiveEdit ? "✓ Selesai Koreksi Teks" : "✏️ Koreksi Teks di Lembar"}</button>
+        <button class="btn sm primary" id="btnPvPdf">Unduh PDF</button>
+      </div>
+    </div>
+
+    <div class="pv-layout-drawer" id="pvLayoutDrawer" style="display:${pvShowLayout ? "block" : "none"}">
+      <div class="pv-layout-header">
+        <div>
+          <b>📐 Pengaturan Tata Letak Paragraf</b>
+          <p class="hint" style="margin:2px 0 0">Sesuaikan ukuran font, spasi baris, dan margin area teks agar isi paragraf pas dan serasi dengan desain Canva.</p>
+        </div>
+        <div class="pv-layout-acts">
+          <button class="btn sm" id="btnSaveToClassTpl" title="Simpan pengaturan ini ke desain aktif kelas agar semua siswa memiliki tata letak seragam">💾 Simpan ke Desain Kelas</button>
+          <button class="btn sm" id="btnSaveToStudent" title="Simpan khusus siswa ini saja">👤 Simpan untuk Siswa Ini</button>
+          <button class="btn sm ghost danger" id="btnResetLayout">↺ Reset Default</button>
+        </div>
+      </div>
+      <div class="pv-layout-grid">
+        <div class="pv-ctrl-card">
+          <h4>Tipografi & Jarak</h4>
+          <div class="pv-ctrl">
+            <div class="pv-ctrl-head"><label for="rg_fs">Ukuran Huruf</label><span class="badge" id="v_fs">${curBody.sizePt} pt</span></div>
+            <div class="pv-ctrl-row">
+              <button class="btn sm ghost" data-step="sizePt" data-val="-0.2">-</button>
+              <input type="range" min="7.5" max="12.0" step="0.1" id="rg_fs" value="${curBody.sizePt}">
+              <button class="btn sm ghost" data-step="sizePt" data-val="0.2">+</button>
+            </div>
+          </div>
+          <div class="pv-ctrl">
+            <div class="pv-ctrl-head"><label for="rg_lh">Spasi Baris</label><span class="badge" id="v_lh">${curBody.lineHeight}</span></div>
+            <div class="pv-ctrl-row">
+              <input type="range" min="1.20" max="1.90" step="0.02" id="rg_lh" value="${curBody.lineHeight}">
+            </div>
+          </div>
+          <div class="pv-ctrl">
+            <div class="pv-ctrl-head"><label for="rg_gap">Jarak Antar Paragraf</label><span class="badge" id="v_gap">${curBody.gapMm} mm</span></div>
+            <div class="pv-ctrl-row">
+              <input type="range" min="0.5" max="7.0" step="0.2" id="rg_gap" value="${curBody.gapMm}">
+            </div>
+          </div>
+          <div class="pv-ctrl">
+            <div class="pv-ctrl-head"><label for="rg_ind">Inden Kalimat Awal</label><span class="badge" id="v_ind">${curBody.indentMm} mm</span></div>
+            <div class="pv-ctrl-row">
+              <input type="range" min="0" max="15" step="0.5" id="rg_ind" value="${curBody.indentMm}">
+            </div>
+          </div>
+        </div>
+
+        <div class="pv-ctrl-card">
+          <h4>Area Paragraf Halaman 1</h4>
+          <div class="pv-ctrl">
+            <div class="pv-ctrl-head"><label for="rg_top1">Batas Atas (Offset Y)</label><span class="badge" id="v_top1">${curBox1.y} mm</span></div>
+            <div class="pv-ctrl-row">
+              <button class="btn sm ghost" data-box="firstTopMm" data-val="-2">-</button>
+              <input type="range" min="40" max="130" step="1" id="rg_top1" value="${curBox1.y}">
+              <button class="btn sm ghost" data-box="firstTopMm" data-val="2">+</button>
+            </div>
+          </div>
+          <div class="pv-ctrl">
+            <div class="pv-ctrl-head"><label for="rg_h1">Tinggi Area Teks</label><span class="badge" id="v_h1">${curBox1.h} mm</span></div>
+            <div class="pv-ctrl-row">
+              <input type="range" min="130" max="240" step="2" id="rg_h1" value="${curBox1.h}">
+            </div>
+          </div>
+        </div>
+
+        <div class="pv-ctrl-card">
+          <h4>Area Paragraf Halaman Lanjutan</h4>
+          <div class="pv-ctrl">
+            <div class="pv-ctrl-head"><label for="rg_top2">Batas Atas (Offset Y)</label><span class="badge" id="v_top2">${curBox2.y} mm</span></div>
+            <div class="pv-ctrl-row">
+              <button class="btn sm ghost" data-box="nextTopMm" data-val="-2">-</button>
+              <input type="range" min="15" max="80" step="1" id="rg_top2" value="${curBox2.y}">
+              <button class="btn sm ghost" data-box="nextTopMm" data-val="2">+</button>
+            </div>
+          </div>
+          <div class="pv-ctrl">
+            <div class="pv-ctrl-head"><label for="rg_h2">Tinggi Area Teks</label><span class="badge" id="v_h2">${curBox2.h} mm</span></div>
+            <div class="pv-ctrl-row">
+              <input type="range" min="170" max="270" step="2" id="rg_h2" value="${curBox2.h}">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pv-edit-notice" id="pvEditNotice" style="display:${pvLiveEdit ? "flex" : "none"}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <span><b>Mode Koreksi Teks Aktif:</b> Klik langsung pada kalimat di lembar pratinjau untuk memperbaiki, menambah, atau memotong kata. Klik di luar teks untuk menyimpan otomatis.</span>
+    </div>
+
+    <div class="pv-pages-container" id="pvPagesContainer"></div>
+  </div>`));
+
+  const wrap = $(".preview-wrap", body);
+  const container = $("#pvPagesContainer", body);
+
+  const renderPagesList = async () => {
+    const stage = document.createElement("div"); stage.style.cssText = "position:fixed;left:0;top:0;z-index:-10;pointer-events:none;opacity:0;";
+    document.body.append(stage);
+    try {
+      const pages = await buildPages(s, stage);
+      if (!body.isConnected) return;
+      const avail = Math.min(wrap.clientWidth - 32, 794), sc = avail / 794;
+
+      const badge = $("#pvPageBadge", body);
+      const statusChip = $("#pvStatusChip", body);
+      if (badge) badge.textContent = `📄 ${pages.length} Halaman A4`;
+      if (statusChip) {
+        if (pages.length > 2) {
+          statusChip.className = "chip warn";
+          statusChip.textContent = "Lebih dari 2 halaman (klik Auto-Fit)";
+        } else {
+          statusChip.className = "chip siap";
+          statusChip.textContent = "Tata letak pas";
+        }
+      }
+
+      container.replaceChildren();
+      for (let i = 0; i < pages.length; i++) {
+        const pg = pages[i];
+        const slot = h(`<div class="pv-slot" style="width:${794 * sc}px;height:${1123 * sc}px">
+          <div class="pv-page-tag">Halaman ${i + 1} dari ${pages.length}</div>
+        </div>`);
+        pg.classList.add("pv-page");
+        pg.style.transform = `scale(${sc})`;
+        slot.append(pg);
+        container.append(slot);
+
+        if (pvLiveEdit) {
+          pg.querySelectorAll(".pg-flow p[data-sec]").forEach((p) => {
+            p.contentEditable = "true";
+            p.spellcheck = false;
+            p.onblur = () => {
+              const sec = p.dataset.sec;
+              const idx = parseInt(p.dataset.idx, 10);
+              if (sec && !isNaN(idx) && s.final?.[sec]) {
+                const newText = p.innerText.trim();
+                if (s.final[sec][idx] !== newText) {
+                  s.final[sec][idx] = newText;
+                  touch(s);
+                  toast("Teks disimpan otomatis.");
+                }
+              }
+            };
+          });
+        }
+      }
+    } catch (e) {
+      container.replaceChildren(h(`<div class="notice bad">Pratinjau gagal: ${esc(e.message || e)}</div>`));
+    } finally {
+      stage.remove();
+    }
+  };
+
+  await renderPagesList();
+
+  $("#btnToggleLayout", body).onclick = () => {
+    pvShowLayout = !pvShowLayout;
+    $("#pvLayoutDrawer", body).style.display = pvShowLayout ? "block" : "none";
+    $("#btnToggleLayout", body).classList.toggle("active", pvShowLayout);
+    $("#btnToggleLayout", body).setAttribute("aria-expanded", pvShowLayout);
+  };
+
+  $("#btnLiveEdit", body).onclick = () => {
+    pvLiveEdit = !pvLiveEdit;
+    $("#btnLiveEdit", body).classList.toggle("active", pvLiveEdit);
+    $("#btnLiveEdit", body).setAttribute("aria-pressed", pvLiveEdit);
+    $("#btnLiveEdit", body).textContent = pvLiveEdit ? "✓ Selesai Koreksi Teks" : "✏️ Koreksi Teks di Lembar";
+    $("#pvEditNotice", body).style.display = pvLiveEdit ? "flex" : "none";
+    renderPreview(body, s);
+  };
+
+  $("#btnAutoFit", body).onclick = () => autoFitLayout(s);
+  $("#btnPvPdf", body).onclick = () => downloadOne(s);
+
+  let liveTimer = 0;
+  const queueLiveUpdate = () => {
+    clearTimeout(liveTimer);
+    liveTimer = setTimeout(renderPagesList, 150);
+  };
+
+  const ensureLayoutObj = () => {
+    s.layout = s.layout || {};
+    s.layout.body = s.layout.body || { ...curBody };
+  };
+
+  const bindRange = (id, key, valElId, unit = "") => {
+    const inp = $(`#${id}`, body);
+    if (!inp) return;
+    inp.oninput = () => {
+      ensureLayoutObj();
+      const val = parseFloat(inp.value);
+      s.layout.body[key] = val;
+      $(`#${valElId}`, body).textContent = val + unit;
+      queueLiveUpdate();
+    };
+  };
+
+  bindRange("rg_fs", "sizePt", "v_fs", " pt");
+  bindRange("rg_lh", "lineHeight", "v_lh", "");
+  bindRange("rg_gap", "gapMm", "v_gap", " mm");
+  bindRange("rg_ind", "indentMm", "v_ind", " mm");
+
+  body.querySelectorAll("[data-step]").forEach((btn) => {
+    btn.onclick = () => {
+      ensureLayoutObj();
+      const key = btn.dataset.step;
+      const step = parseFloat(btn.dataset.val);
+      const cur = s.layout.body[key] ?? curBody[key];
+      const newVal = Math.round((cur + step) * 10) / 10;
+      s.layout.body[key] = newVal;
+      const inp = $(key === "sizePt" ? "#rg_fs" : "", body);
+      if (inp) inp.value = newVal;
+      const valEl = $(key === "sizePt" ? "#v_fs" : "", body);
+      if (valEl) valEl.textContent = newVal + " pt";
+      queueLiveUpdate();
+    };
+  });
+
+  const bindBoxRange = (id, key, valElId) => {
+    const inp = $(`#${id}`, body);
+    if (!inp) return;
+    inp.oninput = () => {
+      s.layout = s.layout || {};
+      const val = parseFloat(inp.value);
+      s.layout[key] = val;
+      $(`#${valElId}`, body).textContent = val + " mm";
+      queueLiveUpdate();
+    };
+  };
+
+  bindBoxRange("rg_top1", "firstTopMm", "v_top1");
+  bindBoxRange("rg_h1", "firstHeightMm", "v_h1");
+  bindBoxRange("rg_top2", "nextTopMm", "v_top2");
+  bindBoxRange("rg_h2", "nextHeightMm", "v_h2");
+
+  body.querySelectorAll("[data-box]").forEach((btn) => {
+    btn.onclick = () => {
+      s.layout = s.layout || {};
+      const key = btn.dataset.box;
+      const step = parseFloat(btn.dataset.val);
+      const cur = s.layout[key] ?? (key === "firstTopMm" ? curBox1.y : key === "nextTopMm" ? curBox2.y : 0);
+      const newVal = Math.round((cur + step) * 10) / 10;
+      s.layout[key] = newVal;
+      const inpId = key === "firstTopMm" ? "rg_top1" : "rg_top2";
+      const valId = key === "firstTopMm" ? "v_top1" : "v_top2";
+      const inp = $(`#${inpId}`, body);
+      if (inp) inp.value = newVal;
+      const valEl = $(`#${valId}`, body);
+      if (valEl) valEl.textContent = newVal + " mm";
+      queueLiveUpdate();
+    };
+  });
+
+  $("#btnSaveToClassTpl", body).onclick = async () => {
+    if (!s.layout) return toast("Belum ada perubahan tata letak.");
+    try {
+      const activeMeta = activeTplMeta();
+      if (activeMeta.builtin) {
+        toast("Desain bawaan tidak bisa diubah langsung. Silakan buat atau duplikat desain Canva baru.");
+        return;
+      }
+      const fullTpl = await resolveTpl(activeMeta);
+      if (s.layout.body) fullTpl.body = { ...fullTpl.body, ...s.layout.body };
+      fullTpl.els = fullTpl.els || [];
+      const b1 = fullTpl.els.find((e) => e.kind === "body" && e.page === "first");
+      const b2 = fullTpl.els.find((e) => e.kind === "body" && e.page === "next");
+      if (b1) {
+        if (s.layout.firstTopMm != null) b1.y = s.layout.firstTopMm;
+        if (s.layout.firstHeightMm != null) b1.h = s.layout.firstHeightMm;
+      }
+      if (b2) {
+        if (s.layout.nextTopMm != null) b2.y = s.layout.nextTopMm;
+        if (s.layout.nextHeightMm != null) b2.h = s.layout.nextHeightMm;
+      }
+      await saveTemplate(fullTpl, {});
+      delete s.layout;
+      touch(s);
+      toast("✅ Tata letak berhasil disimpan sebagai standar desain kelas!");
+    } catch (e) {
+      toast("Gagal menyimpan ke desain kelas: " + (e.message || e));
+    }
+  };
+
+  $("#btnSaveToStudent", body).onclick = () => {
+    touch(s);
+    toast(`✅ Tata letak khusus disimpan untuk siswa "${s.nama}".`);
+  };
+
+  $("#btnResetLayout", body).onclick = () => {
+    delete s.layout;
+    touch(s);
+    renderPreview(body, s);
+    toast("Tata letak dikembalikan ke default desain.");
+  };
 }
 
 /* ================= Aksi: AI, unduh ================= */
@@ -1281,6 +1855,7 @@ function openKelas(isNew) {
 
 /* ================= Mulai ================= */
 $("#btnKelas").onclick = () => openKelas(false);
+$("#btnUploadCanva").onclick = () => openUploadCanvaModal();
 $("#btnTpl").onclick = () => openTemplates();
 $("#btnAllAI").onclick = () => runAI(S.students);
 $("#btnZip").onclick = downloadZip;
@@ -1290,7 +1865,7 @@ $("#btnZip").onclick = downloadZip;
   setSaveState(S.mode === "db" ? "Tersimpan" : "");
   render();
 })();
-window.__app = { S, T, pdfBlob, buildPages, buildPrompt, addStudent, saveTemplate, newTemplate, openEditor, openTemplates, CONTOH_KELAS, CONTOH_SISWA };
+window.__app = { S, T, pdfBlob, buildPages, buildPrompt, addStudent, saveTemplate, newTemplate, openEditor, openTemplates, openUploadCanvaModal, CONTOH_KELAS, CONTOH_SISWA };
 </script>
 </body>
 </html>
