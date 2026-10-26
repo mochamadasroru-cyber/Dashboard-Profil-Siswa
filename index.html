@@ -890,17 +890,20 @@ function generateSmartNarrative(s) {
     ak1 += ` ${sp} ${pg} memiliki minat dan pemahaman yang sangat menonjol pada mata pelajaran ${mapel}.`;
   }
   if (sikap) {
-    ak1 += ` Dalam keseharian di kelas, ${sikap.toLowerCase().startsWith("ananda") ? sikap : sp + " " + pg + " " + sikap.toLowerCase()}.`;
+    const sClean = sikap.replace(/[.]+$/, "");
+    ak1 += ` Dalam keseharian di kelas, ${sClean.toLowerCase().startsWith("ananda") ? sClean : sp + " " + pg + " " + sClean.charAt(0).toLowerCase() + sClean.slice(1)}.`;
   }
   if (pos) {
-    ak1 += ` Hal positif yang membanggakan adalah ${pos.toLowerCase().startsWith("ananda") ? pos : sp + " " + pg + " " + pos.toLowerCase()}.`;
+    const pClean = pos.replace(/[.]+$/, "");
+    ak1 += ` Hal positif yang membanggakan adalah ${pClean.toLowerCase().startsWith("ananda") ? pClean : sp + " " + pg + " " + pClean.charAt(0).toLowerCase() + pClean.slice(1)}.`;
   }
   akLines.push(ak1.replace(/\s+/g, " ").trim());
 
   if (ting || catAk) {
     let ak2 = `Adapun ikhtiar yang perlu terus ditingkatkan bersama adalah `;
     if (ting) {
-      ak2 += `${ting.toLowerCase().startsWith("ananda") ? ting : sp + " " + pg + " " + ting.toLowerCase()}.`;
+      const tClean = ting.replace(/[.]+$/, "");
+      ak2 += `${tClean.toLowerCase().startsWith("ananda") ? tClean : tClean.charAt(0).toLowerCase() + tClean.slice(1)}.`;
     }
     if (catAk) {
       ak2 += ` ${catAk}.`;
@@ -969,7 +972,7 @@ function generateSmartNarrative(s) {
   if (shaum && shaum !== "-") {
     kg2 += `Ananda juga termotivasi mengikuti shaum sunnah (${shaum.toLowerCase()}). `;
   }
-  if (peranMuh) {
+  if (peranMuh && !["belum ada", "tidak ada", "-", "belum", "tidak"].includes(peranMuh.toLowerCase())) {
     kg2 += `Dalam kegiatan Muhadhoroh, ananda berperan aktif sebagai ${peranMuh}. `;
   }
   if (perluBina) {
@@ -1045,7 +1048,8 @@ function generateSmartNarrative(s) {
 
   let ks2 = `Ke depannya, ${sp} ${pg} diharapkan dapat terus mengasah potensinya, `;
   if (dikembangkan) {
-    ks2 += `khususnya dalam ${dikembangkan.toLowerCase()}. `;
+    const dClean = dikembangkan.replace(/[.]+$/, "");
+    ks2 += `khususnya dalam ${dClean.toLowerCase().startsWith("harus") ? dClean.slice(5).trim() : dClean.toLowerCase()}. `;
   } else {
     ks2 += `baik dalam pendalaman materi akademik maupun penguatan kemandirian diri. `;
   }
