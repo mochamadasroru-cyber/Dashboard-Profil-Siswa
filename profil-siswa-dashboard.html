@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Profil Siswa Al Fakhir</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Luckiest+Guy&family=Fredoka:wght@500;700&family=Baloo+2:wght@600;800&family=Poppins:wght@400;600;700&family=Pacifico&family=Nunito:wght@400;700&family=Merriweather:wght@400;700&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lexend:wght@400;500;600;700&family=Luckiest+Guy&family=Fredoka:wght@500;700&family=Baloo+2:wght@600;800&family=Poppins:wght@400;600;700&family=Pacifico&family=Nunito:wght@400;700&family=Merriweather:wght@400;700&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,10 +21,10 @@
     </div>
     <div class="top-actions">
       <span class="save-state" id="saveState" aria-live="polite"></span>
-      <button class="btn" id="btnKelas" hidden>Pengaturan kelas</button>
-      <button class="btn" id="btnTpl" hidden>Desain PDF</button>
-      <button class="btn" id="btnAllAI" hidden>Tulis semua dengan AI</button>
-      <button class="btn primary" id="btnZip" hidden>Unduh semua (ZIP)</button>
+      <button class="btn" id="btnKelas" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan kelas</span></button>
+      <button class="btn" id="btnTpl" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Desain PDF</span></button>
+      <button class="btn" id="btnAllAI" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg><span>Tulis semua dengan AI</span></button>
+      <button class="btn primary" id="btnZip" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Unduh semua (ZIP)</span></button>
     </div>
   </header>
   <main id="main"><div class="panel loading">Memuat data kelas…</div></main>
@@ -971,6 +972,10 @@ function render() {
     <div class="grid">
       <aside class="panel side">
         <div class="side-head"><h2>Siswa</h2><span class="tally" id="count"></span></div>
+        <div class="side-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="stuSearch" placeholder="Cari nama siswa…" autocomplete="off" spellcheck="false">
+        </div>
         <ul class="stu-list" id="stuList"></ul>
         <div class="side-foot">
           <div class="tally" id="tally"></div>
@@ -982,21 +987,35 @@ function render() {
   $("#addStu").onclick = () => addStudent();
   $("#mAdd").onclick = () => addStudent();
   $("#mPick").onchange = (e) => select(e.target.value);
+  const searchInput = $("#stuSearch");
+  if (searchInput) {
+    searchInput.value = S.filter || "";
+    searchInput.oninput = (e) => {
+      S.filter = e.target.value.toLowerCase().trim();
+      renderList();
+    };
+  }
   renderList(); renderWork();
 }
 function renderList() {
   const ul = $("#stuList"); if (!ul) return;
-  ul.replaceChildren(...S.students.map((s, i) => {
-    const st = statusOf(s);
-    const li = h(`<li><button class="stu" aria-current="${s.id === S.sel}"><span class="no">${i + 1}</span><span class="nm">${esc(s.nama || "Siswa baru")}</span><span class="dot ${st}" title="${STATUS_LABEL[st]}"></span></button></li>`);
-    li.firstElementChild.onclick = () => select(s.id);
-    return li;
-  }));
+  const q = (S.filter || "").toLowerCase();
+  const visible = S.students.map((s, i) => ({ s, i })).filter(({ s }) => !q || (s.nama || "").toLowerCase().includes(q) || (s.panggilan || "").toLowerCase().includes(q));
+  if (!visible.length && S.students.length > 0) {
+    ul.innerHTML = `<li class="stu-empty-hint" style="padding:16px 8px;text-align:center;color:var(--muted);font-size:12.5px">Tidak ada siswa yang cocok</li>`;
+  } else {
+    ul.replaceChildren(...visible.map(({ s, i }) => {
+      const st = statusOf(s);
+      const li = h(`<li><button class="stu" aria-current="${s.id === S.sel}"><span class="no">${i + 1}</span><span class="nm">${esc(s.nama || "Siswa baru")}</span><span class="dot ${st}" title="${STATUS_LABEL[st]}"></span></button></li>`);
+      li.firstElementChild.onclick = () => select(s.id);
+      return li;
+    }));
+  }
   const c = { kosong: 0, draf: 0, siap: 0 }; S.students.forEach((s) => c[statusOf(s)]++);
-  $("#count").textContent = S.students.length;
-  $("#tally").innerHTML = `<span>${c.siap} siap cetak</span><span>${c.draf} data terisi</span><span>${c.kosong} belum</span>`;
+  $("#count").textContent = S.filter ? `${visible.length}/${S.students.length}` : S.students.length;
+  $("#tally").innerHTML = `<span><b>${c.siap}</b> siap cetak</span><span><b>${c.draf}</b> terisi</span><span><b>${c.kosong}</b> belum</span>`;
   const mp = $("#mPick");
-  mp.replaceChildren(...S.students.map((s, i) => { const o = document.createElement("option"); o.value = s.id; o.textContent = `${i + 1}. ${s.nama || "Siswa baru"} · ${STATUS_LABEL[statusOf(s)]}`; o.selected = s.id === S.sel; return o; }));
+  if (mp) mp.replaceChildren(...S.students.map((s, i) => { const o = document.createElement("option"); o.value = s.id; o.textContent = `${i + 1}. ${s.nama || "Siswa baru"} · ${STATUS_LABEL[statusOf(s)]}`; o.selected = s.id === S.sel; return o; }));
   $("#btnZip").disabled = !c.siap;
 }
 function select(id) { S.sel = id; S.tab = S.tab || "data"; renderList(); renderWork(); }
@@ -1021,8 +1040,8 @@ function renderWork() {
       <h2 id="wName">${esc(s.nama || "Siswa baru")}</h2><span class="chip ${st}" id="stChip">${STATUS_LABEL[st]}</span>
       ${s.contoh ? `<span class="chip kosong">Contoh</span>` : ""}
       <span class="grow"></span>
-      <button class="btn" id="wAI" ${sample ? "" : "disabled title='AI tidak tersedia di tampilan ini'"}>Tulis paragraf dengan AI</button>
-      <button class="btn primary" id="wPdf">Unduh PDF</button>
+      <button class="btn" id="wAI" ${sample ? "" : "disabled title='AI tidak tersedia di tampilan ini'"}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg><span>Tulis dengan AI</span></button>
+      <button class="btn primary" id="wPdf"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Unduh PDF</span></button>
     </div>
     <div class="tabs" role="tablist">
       ${[["data", "Data siswa"], ["paragraf", "Paragraf"], ["pratinjau", "Pratinjau"]].map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${S.tab === k}">${l}</button>`).join("")}
