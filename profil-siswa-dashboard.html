@@ -374,7 +374,7 @@ async function buildPages(s, stage, tplIn) {
   let l1, l2;
   if (tpl.builtin) {
     [l1, l2] = await Promise.all([
-      renderHeader({ first: true, name: nameUp, kelas: kelasUp, photos: { group: S.kelas.fotoBersama, portrait: s.fotoPortrait, activity: s.fotoKegiatan } }),
+      renderHeader({ first: true, name: nameUp, kelas: kelasUp, photos: { group: S.kelas.fotoBersama || getStudentPhoto(s, "foto3"), portrait: getStudentPhoto(s, "foto1"), activity: getStudentPhoto(s, "foto2") } }),
       renderHeader({ first: false, name: nameUp, kelas: kelasUp }),
     ]);
   } else {
@@ -424,7 +424,61 @@ async function buildPages(s, stage, tplIn) {
 const PXMM = 794 / 210;
 const FONTS_TITLE = ["Luckiest Guy", "Fredoka", "Baloo 2", "Poppins", "Pacifico", "Lexend"];
 const FONTS_BODY = ["Lexend", "Poppins", "Nunito", "Merriweather"];
-const PHOTO_SRC = { portrait: "Foto portrait siswa", kegiatan: "Foto kegiatan siswa", bersama: "Foto bersama kelas" };
+const PHOTO_SRC = {
+  foto1: "Foto 1 (Utama / Portrait)",
+  foto2: "Foto 2 (Kegiatan / Sekunder)",
+  foto3: "Foto 3 (Tambahan / Kebersamaan)",
+  portrait: "Foto 1 (Utama / Portrait)",
+  kegiatan: "Foto 2 (Kegiatan / Sekunder)",
+  bersama: "Foto bersama kelas"
+};
+
+function getStudentPhoto(s, key) {
+  if (!s) return "";
+  if (key === "foto1" || key === "portrait") return s.foto1 || s.fotoPortrait || "";
+  if (key === "foto2" || key === "kegiatan") return s.foto2 || s.fotoKegiatan || "";
+  if (key === "foto3" || key === "extra") return s.foto3 || s.fotoExtra || "";
+  if (key === "bersama") return S.kelas?.fotoBersama || "";
+  return s[key] || "";
+}
+
+function setStudentPhoto(s, key, val) {
+  if (!s) return;
+  if (key === "foto1" || key === "portrait") { s.foto1 = val; s.fotoPortrait = val; }
+  else if (key === "foto2" || key === "kegiatan") { s.foto2 = val; s.fotoKegiatan = val; }
+  else if (key === "foto3" || key === "extra") { s.foto3 = val; s.fotoExtra = val; }
+  else { s[key] = val; }
+}
+
+function getTemplatePhotoFrames(tpl, s) {
+  if (!tpl || tpl.builtin) {
+    return [
+      { id: "bf1", num: 1, key: "foto1", src: "foto1", label: "Foto 1 (Utama)", page: "first", shape: "hexagon", x: 126, y: 24, w: 40, h: 35, border: "#8b5cf6", borderW: 1.4 },
+      { id: "bf2", num: 2, key: "foto2", src: "foto2", label: "Foto 2 (Kegiatan)", page: "first", shape: "hexagon", x: 160, y: 42, w: 40, h: 35, border: "#8b5cf6", borderW: 1.4 },
+      { id: "bf3", num: 3, key: "foto3", src: "foto3", label: "Foto 3 (Bersama)", page: "first", shape: "hexagon", x: 160, y: 5, w: 40, h: 35, border: "#8b5cf6", borderW: 1.4 },
+    ];
+  }
+  const photoEls = (tpl.els || []).filter((e) => e.kind === "foto");
+  if (!photoEls.length) {
+    return [{ id: "def_f1", num: 1, key: "foto1", src: "foto1", label: "Foto 1 (Utama)", page: "first", shape: "circle", x: 146, y: 20, w: 46, h: 46, border: "#8b5cf6", borderW: 1.4 }];
+  }
+  return photoEls.map((e, idx) => {
+    const num = idx + 1;
+    const key = e.src === "kegiatan" || e.src === "foto2" ? "foto2" : e.src === "extra" || e.src === "foto3" ? "foto3" : "foto1";
+    const base = {
+      ...e,
+      num,
+      key,
+      label: e.label || PHOTO_SRC[e.src] || `Foto Frame ${num}`
+    };
+    const ov = Array.isArray(s?.layout?.frames) ? (s.layout.frames.find((f) => f.id === e.id) || s.layout.frames[idx]) : s?.layout?.frames?.[e.id];
+    if (ov) {
+      Object.assign(base, ov);
+    }
+    return base;
+  });
+}
+
 const SHAPES = { hexagon: "Heksagon", circle: "Lingkaran", rounded: "Kotak membulat", rect: "Kotak" };
 const DEFAULT_BODY = { font: "Lexend", sizePt: 9.7, color: "#1f1d1a", lineHeight: 1.58, indentMm: 6, gapMm: 3.4 };
 const BUILTIN = { id: "builtin", nama: "Bawaan: bintang & heksagon", builtin: true, body: { ...DEFAULT_BODY },
@@ -432,15 +486,25 @@ const BUILTIN = { id: "builtin", nama: "Bawaan: bintang & heksagon", builtin: tr
 const T = { list: [], imgs: new Map() };
 const TPL_LS = "profil-siswa-tpl-v1";
 
-function newTemplate() {
-  return { id: "t_" + rid(), type: "meta", nama: "Desain baru", createdAt: Date.now(), bg: { first: false, next: false }, body: { ...DEFAULT_BODY },
-    els: [
-      { id: rid(), kind: "body", page: "first", x: 18, y: 88, w: 174, h: 190 },
-      { id: rid(), kind: "body", page: "next", x: 18, y: 30, w: 174, h: 248 },
-      { id: rid(), kind: "nama", page: "first", x: 18, y: 34, w: 120, h: 15, font: "Luckiest Guy", color: "#7be3f2", stroke: "#8b5cf6", strokeW: 1.1, shadow: true, align: "left", upper: true },
-      { id: rid(), kind: "kelas", page: "first", x: 18, y: 51, w: 100, h: 12, font: "Luckiest Guy", color: "#7be3f2", stroke: "#8b5cf6", strokeW: 1, shadow: true, align: "left", upper: true },
-      { id: rid(), kind: "foto", page: "first", x: 146, y: 22, w: 46, h: 46, src: "portrait", shape: "circle", border: "#8b5cf6", borderW: 1.4 },
-    ] };
+function newTemplate(photoCount = 2, photoShape = "circle", photoBorder = "#8b5cf6") {
+  const els = [
+    { id: rid(), kind: "body", page: "first", x: 18, y: 88, w: 174, h: 190 },
+    { id: rid(), kind: "body", page: "next", x: 18, y: 30, w: 174, h: 248 },
+    { id: rid(), kind: "nama", page: "first", x: 18, y: 34, w: 120, h: 15, font: "Luckiest Guy", color: "#7be3f2", stroke: "#8b5cf6", strokeW: 1.1, shadow: true, align: "left", upper: true },
+    { id: rid(), kind: "kelas", page: "first", x: 18, y: 51, w: 100, h: 12, font: "Luckiest Guy", color: "#7be3f2", stroke: "#8b5cf6", strokeW: 1, shadow: true, align: "left", upper: true },
+  ];
+  if (photoCount === 1) {
+    els.push({ id: rid(), kind: "foto", page: "first", x: 146, y: 20, w: 46, h: 46, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+  } else if (photoCount === 2) {
+    els.push({ id: rid(), kind: "foto", page: "first", x: 148, y: 15, w: 44, h: 44, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+    els.push({ id: rid(), kind: "foto", page: "first", x: 148, y: 64, w: 44, h: 44, src: "foto2", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 2 (Kegiatan)" });
+  } else {
+    // 3 frame maksimal
+    els.push({ id: rid(), kind: "foto", page: "first", x: 152, y: 8, w: 38, h: 36, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+    els.push({ id: rid(), kind: "foto", page: "first", x: 120, y: 28, w: 38, h: 36, src: "foto2", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 2 (Kegiatan)" });
+    els.push({ id: rid(), kind: "foto", page: "first", x: 152, y: 48, w: 38, h: 36, src: "foto3", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 3 (Tambahan)" });
+  }
+  return { id: "t_" + rid(), type: "meta", nama: "Desain baru", createdAt: Date.now(), bg: { first: false, next: false }, body: { ...DEFAULT_BODY }, els };
 }
 const lsTpl = () => { try { return JSON.parse(localStorage.getItem(TPL_LS)) || { list: [], imgs: {} }; } catch (e) { return { list: [], imgs: {} }; } };
 async function loadTemplates() {
@@ -566,10 +630,29 @@ async function renderLayer(tpl, page, s) {
   ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, cv.width, cv.height);
   const bg = await loadImg(page === "first" ? tpl.bgFirstSrc : (tpl.bgNextSrc || tpl.bgFirstSrc));
   if (bg) ctx.drawImage(bg, 0, 0, cv.width, cv.height);
-  const photo = { portrait: s.fotoPortrait, kegiatan: s.fotoKegiatan, bersama: S.kelas?.fotoBersama };
-  for (const el of (tpl.els || []).filter((e) => e.page === page && e.kind !== "body")) {
-    if (el.kind === "foto") drawPhotoEl(ctx, await loadImg(photo[el.src]), el);
-    else drawTextEl(ctx, el.kind === "nama" ? (s.nama || "Nama Siswa") : (S.kelas?.namaKelas || "Kelas"), el);
+  const photo = {
+    foto1: s ? getStudentPhoto(s, "foto1") : "",
+    portrait: s ? getStudentPhoto(s, "foto1") : "",
+    foto2: s ? getStudentPhoto(s, "foto2") : "",
+    kegiatan: s ? getStudentPhoto(s, "foto2") : "",
+    foto3: s ? getStudentPhoto(s, "foto3") : "",
+    extra: s ? getStudentPhoto(s, "foto3") : "",
+    bersama: S.kelas?.fotoBersama || ""
+  };
+  const photoEls = (tpl.els || []).filter((e) => e.page === page && e.kind === "foto");
+  for (let idx = 0; idx < photoEls.length; idx++) {
+    const el = photoEls[idx];
+    const srcKey = el.src || (idx === 0 ? "foto1" : idx === 1 ? "foto2" : "foto3");
+    const effEl = { ...el };
+    const ov = Array.isArray(s?.layout?.frames) ? (s.layout.frames.find((f) => f.id === el.id) || s.layout.frames[idx]) : s?.layout?.frames?.[el.id];
+    if (ov) {
+      Object.assign(effEl, ov);
+    }
+    const imgData = photo[effEl.src || srcKey] || photo[`foto${idx + 1}`] || "";
+    drawPhotoEl(ctx, await loadImg(imgData), effEl);
+  }
+  for (const el of (tpl.els || []).filter((e) => e.page === page && e.kind !== "body" && e.kind !== "foto")) {
+    drawTextEl(ctx, el.kind === "nama" ? (s ? s.nama : "Nama Siswa") : (S.kelas?.namaKelas || "Kelas"), el);
   }
   return cv.toDataURL("image/jpeg", 0.92);
 }
@@ -787,6 +870,34 @@ async function openUploadCanvaModal() {
         <div class="canva-thumbs" id="canvaThumbs"></div>
       </div>
 
+      <div id="canvaFrameConfig" style="margin-top:16px;padding:14px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--r-sm)">
+        <div style="font-weight:700;font-size:13.5px;color:var(--fg-heading);margin-bottom:4px">🖼️ Pengaturan Frame Foto Desain</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Tentukan berapa foto yang ada pada desain Canva bulan ini (maksimal 3 frame):</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <label class="radio-card"><input type="radio" name="canvaPhotoCount" value="1"> <span><b>1 Frame</b><br><small style="color:var(--muted)">1 Foto Utama</small></span></label>
+          <label class="radio-card active"><input type="radio" name="canvaPhotoCount" value="2" checked> <span><b>2 Frame</b><br><small style="color:var(--muted)">2 Foto Siswa</small></span></label>
+          <label class="radio-card"><input type="radio" name="canvaPhotoCount" value="3"> <span><b>3 Frame</b><br><small style="color:var(--muted)">Maksimal 3 Foto</small></span></label>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="f">
+            <label for="canvaPhotoShape">Bentuk Frame Foto</label>
+            <select id="canvaPhotoShape">
+              <option value="circle">Lingkaran (Bulat)</option>
+              <option value="rounded">Kotak Membulat</option>
+              <option value="rect">Kotak Persegi</option>
+              <option value="hexagon">Heksagon (Segienam)</option>
+            </select>
+          </div>
+          <div class="f">
+            <label for="canvaPhotoBorder">Warna Garis Tepi Frame</label>
+            <input type="color" id="canvaPhotoBorder" value="#8b5cf6">
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:11.5px;color:var(--muted);line-height:1.4">
+          💡 <i>Letak posisi koordinat (X & Y mm) dapat disesuaikan lewat tombol <b>"Atur Posisi Frame Foto"</b> di tab Pratinjau agar pas 100% dengan ilustrasi Canva.</i>
+        </div>
+      </div>
+
       <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
         <div class="f">
           <label for="canvaName">Nama Desain</label>
@@ -808,6 +919,12 @@ async function openUploadCanvaModal() {
   const close = () => el.remove();
   $("#upClose", el).onclick = close;
   $("#upCancel", el).onclick = close;
+
+  el.querySelectorAll("input[name='canvaPhotoCount']").forEach((r) => {
+    r.onchange = () => {
+      el.querySelectorAll(".radio-card").forEach((c) => c.classList.toggle("active", c.contains(r) && r.checked));
+    };
+  });
 
   const drop = $("#canvaDrop", el);
   const fileInp = $("#canvaFile", el);
@@ -866,7 +983,10 @@ async function openUploadCanvaModal() {
     submitBtn.textContent = "Menyimpan…";
 
     try {
-      const tpl = newTemplate();
+      const pCount = parseInt($("input[name='canvaPhotoCount']:checked", el)?.value || "2", 10);
+      const pShape = $("#canvaPhotoShape", el)?.value || "circle";
+      const pBorder = $("#canvaPhotoBorder", el)?.value || "#8b5cf6";
+      const tpl = newTemplate(pCount, pShape, pBorder);
       tpl.nama = $("#canvaName", el).value.trim() || defName;
       const imgs = { first: extracted.first, next: extracted.next || extracted.first };
       const saved = await saveTemplate(tpl, imgs);
@@ -878,7 +998,7 @@ async function openUploadCanvaModal() {
       }
       close();
       render();
-      toast(`🎉 Desain "${saved.nama}" berhasil disimpan${setActive ? " dan dipasang!" : "."}`);
+      toast(`🎉 Desain "${saved.nama}" berhasil disimpan (${pCount} frame foto)${setActive ? " dan dipasang!" : "."}`);
       if (S.sel) {
         S.tab = "pratinjau";
         renderWork();
@@ -1062,7 +1182,7 @@ function openEditor(t, isNew) {
         ${bgBlock("next", "Halaman lanjutan", "Kosong = pakai halaman pertama")}</div></div>
       <div><h4>Halaman yang diatur</h4><div class="seg" role="group" aria-label="Halaman"><button data-pg="first" aria-pressed="${page === "first"}">Halaman pertama</button><button data-pg="next" aria-pressed="${page === "next"}">Halaman lanjutan</button></div></div>
       <div><h4>Elemen di halaman ini</h4><div class="el-list">${els().map((x) => `<button class="el-item" data-sel="${x.id}" aria-current="${x.id === sel}"><span class="sw" style="background:${x.kind === "body" ? "#1f8a5b" : "#6d3fe0"}"></span>${esc(label(x))}</button>`).join("")}</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${has("nama") ? "" : `<button class="btn sm" data-add="nama">+ Nama siswa</button>`}${has("kelas") ? "" : `<button class="btn sm" data-add="kelas">+ Nama kelas</button>`}<button class="btn sm" data-add="foto">+ Foto</button></div></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${has("nama") ? "" : `<button class="btn sm" data-add="nama">+ Nama siswa</button>`}${has("kelas") ? "" : `<button class="btn sm" data-add="kelas">+ Nama kelas</button>`}${t.els.filter((x) => x.kind === "foto").length < 3 ? `<button class="btn sm" data-add="foto">+ Foto (${t.els.filter((x) => x.kind === "foto").length + 1}/3)</button>` : `<button class="btn sm ghost" disabled title="Maksimal 3 frame foto">+ Foto (Maks 3)</button>`}</div></div>
       <div><h4>${e ? esc(label(e)) : "Atur elemen"}</h4>${propsHtml(e)}</div>
       <div><h4>Teks paragraf (semua halaman)</h4><div class="fields">
         <div class="f" style="grid-column:1/-1"><label for="eb_font">Huruf</label><select id="eb_font" data-b="font">${FONTS_BODY.map((f) => `<option ${b.font === f ? "selected" : ""}>${f}</option>`).join("")}</select></div>
@@ -1076,9 +1196,20 @@ function openEditor(t, isNew) {
     side.querySelectorAll("[data-sel]").forEach((bt) => bt.onclick = () => { sel = bt.dataset.sel; paintSide(); paintBoxes(); });
     side.querySelectorAll("[data-add]").forEach((bt) => bt.onclick = () => {
       const kind = bt.dataset.add, base = { id: rid(), kind, page };
-      const ne = kind === "foto" ? { ...base, x: 140, y: 20, w: 45, h: 45, src: "portrait", shape: "circle", border: "#8b5cf6", borderW: 1.4 }
-        : { ...base, x: 18, y: kind === "nama" ? 30 : 47, w: 120, h: kind === "nama" ? 15 : 12, font: "Luckiest Guy", color: "#7be3f2", stroke: "#8b5cf6", strokeW: 1, shadow: true, align: "left", upper: true };
-      t.els.push(ne); sel = ne.id; repaint();
+      if (kind === "foto") {
+        const curFotos = t.els.filter((x) => x.kind === "foto");
+        if (curFotos.length >= 3) {
+          toast("Maksimal 3 frame foto per desain.");
+          return;
+        }
+        const fNum = curFotos.length + 1;
+        const src = fNum === 1 ? "foto1" : fNum === 2 ? "foto2" : "foto3";
+        const ne = { ...base, x: 140, y: 20 + (fNum - 1) * 35, w: 42, h: 42, src, shape: "circle", border: "#8b5cf6", borderW: 1.4, label: `Foto ${fNum}` };
+        t.els.push(ne); sel = ne.id; repaint();
+      } else {
+        const ne = { ...base, x: 18, y: kind === "nama" ? 30 : 47, w: 120, h: kind === "nama" ? 15 : 12, font: "Luckiest Guy", color: "#7be3f2", stroke: "#8b5cf6", strokeW: 1, shadow: true, align: "left", upper: true };
+        t.els.push(ne); sel = ne.id; repaint();
+      }
     });
     side.querySelectorAll("[data-bg]").forEach((inp) => inp.onchange = async () => {
       const file = inp.files?.[0]; if (!file) return;
@@ -1293,14 +1424,49 @@ function fieldHtml(f, inp) {
 }
 function renderForm(body, s) {
   const inp = s.input || (s.input = { kegiatanSkip: [] });
-  const photo = (key, label) => `<div class="photo"><div class="thumb ${s[key] ? "has" : ""}" id="th_${key}" style="${s[key] ? `background-image:url('${s[key]}')` : ""}"></div>
-     <div class="meta"><span>${label}</span><span style="display:flex;gap:6px"><span class="btn sm file-btn">Pilih foto<input type="file" accept="image/*" data-photo="${key}" aria-label="${label}"></span>${s[key] ? `<button class="btn sm ghost" data-clear="${key}">Hapus</button>` : ""}</span></div></div>`;
+  const activeMeta = activeTplMeta();
+  const frames = getTemplatePhotoFrames(activeMeta, s);
+
   body.replaceChildren(h(`<div>
     <div class="sec"><h3>Identitas</h3><div class="fields">
       <div class="f"><label for="f_nama">Nama lengkap</label><input type="text" id="f_nama" value="${esc(s.nama)}" placeholder="mis. Naura Althea Fadya"></div>
       <div class="f"><label for="f_panggilan">Nama panggilan</label><input type="text" id="f_panggilan" value="${esc(s.panggilan)}" placeholder="mis. Naura"><span class="hint">Dipakai di paragraf, mis. "ananda Naura".</span></div>
-      <div class="photo-row">${photo("fotoPortrait", "Foto portrait")}${photo("fotoKegiatan", "Foto kegiatan")}</div>
     </div></div>
+
+    <div class="sec">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <div>
+          <h3 style="margin:0 0 2px">🖼️ Foto Siswa (${frames.length} Frame sesuai Desain Aktif)</h3>
+          <span class="hint" style="margin:0">Desain <b>"${esc(activeMeta.nama)}"</b> memiliki <b>${frames.length} frame foto</b> (maksimal 3 frame).</span>
+        </div>
+        <button class="btn sm" id="btnGoToFramesTab" type="button" title="Atur letak presisi frame foto di desain Canva">📐 Atur Letak Frame Foto di Pratinjau →</button>
+      </div>
+      <div class="stu-photo-grid">
+        ${frames.map((f, i) => {
+          const pKey = f.key || (i === 0 ? "foto1" : i === 1 ? "foto2" : "foto3");
+          const pVal = getStudentPhoto(s, pKey);
+          return `<div class="stu-photo-card">
+            <div class="stu-photo-head">
+              <span class="stu-photo-badge">Frame ${f.num || (i + 1)}</span>
+              <span class="stu-photo-page">Hal ${f.page === "first" ? "1 (Utama)" : "2 (Lanjutan)"} · ${SHAPES[f.shape] || f.shape || "Lingkaran"}</span>
+            </div>
+            <div class="stu-photo-title">${esc(f.label || `Foto ${i + 1}`)}</div>
+            <div class="photo">
+              <div class="thumb ${pVal ? "has" : ""}" id="th_${pKey}" style="${pVal ? `background-image:url('${pVal}')` : ""}">
+                ${pVal ? "" : `<span>Belum ada foto</span>`}
+              </div>
+              <div class="meta">
+                <span style="display:flex;gap:6px;width:100%">
+                  <span class="btn sm file-btn" style="flex:1;text-align:center">Pilih foto<input type="file" accept="image/*" data-photo="${pKey}" aria-label="Upload ${f.label}"></span>
+                  ${pVal ? `<button class="btn sm ghost danger" data-clear="${pKey}" type="button">Hapus</button>` : ""}
+                </span>
+              </div>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>
+
     ${SECTIONS.map((sec) => `<div class="sec"><h3>${esc(sec.title)}</h3><div class="fields">${
       sec.id === "keagamaan"
         ? `<div class="rate-grid">${sec.fields.filter((f) => f.type === "rate").map((f) => fieldHtml(f, inp)).join("")}</div>${sec.fields.filter((f) => f.type !== "rate").map((f) => fieldHtml(f, inp)).join("")}`
@@ -1323,10 +1489,26 @@ function renderForm(body, s) {
   });
   body.querySelectorAll("[data-photo]").forEach((el) => el.onchange = async () => {
     const file = el.files?.[0]; if (!file) return;
-    try { s[el.dataset.photo] = await readImage(file, 640); touch(s); renderForm(body, s); }
-    catch (e) { toast(e.message); }
+    try {
+      const k = el.dataset.photo;
+      const imgData = await readImage(file, 900);
+      setStudentPhoto(s, k, imgData);
+      touch(s);
+      renderForm(body, s);
+    } catch (e) { toast(e.message); }
   });
-  body.querySelectorAll("[data-clear]").forEach((el) => el.onclick = () => { s[el.dataset.clear] = ""; touch(s); renderForm(body, s); });
+  body.querySelectorAll("[data-clear]").forEach((el) => el.onclick = () => {
+    const k = el.dataset.clear;
+    setStudentPhoto(s, k, "");
+    touch(s);
+    renderForm(body, s);
+  });
+  const btnGoFrames = $("#btnGoToFramesTab", body);
+  if (btnGoFrames) btnGoFrames.onclick = () => {
+    S.tab = "pratinjau";
+    pvShowFrames = true;
+    renderWork();
+  };
   $("#toPara").onclick = () => runAI([s]);
   const del = $("#delStu");
   del.onclick = () => {
@@ -1378,6 +1560,7 @@ function renderParas(body, s) {
 
 /* ================= Tab: Pratinjau & Rapikan Tata Letak ================= */
 let pvShowLayout = false;
+let pvShowFrames = false;
 let pvLiveEdit = false;
 
 async function autoFitLayout(s) {
@@ -1439,6 +1622,7 @@ async function renderPreview(body, s) {
   const curBody = { ...DEFAULT_BODY, ...(tpl.body || {}), ...(s.layout?.body || {}) };
   const curBox1 = bodyBox(tpl, "first", s);
   const curBox2 = bodyBox(tpl, "next", s);
+  const curFrames = getTemplatePhotoFrames(tpl, s);
 
   body.replaceChildren(h(`<div class="preview-wrap">
     <div class="pv-toolbar">
@@ -1447,10 +1631,128 @@ async function renderPreview(body, s) {
         <span class="pv-status-chip" id="pvStatusChip"></span>
       </div>
       <div class="pv-actions">
-        <button class="btn sm" id="btnAutoFit" title="Kecilkan font sedikit secara otomatis agar pas tanpa baris menggantung">⚡ Auto-Fit Halaman</button>
-        <button class="btn sm ${pvShowLayout ? "active" : ""}" id="btnToggleLayout" aria-expanded="${pvShowLayout}">📐 Rapikan Tata Letak</button>
-        <button class="btn sm ${pvLiveEdit ? "active" : ""}" id="btnLiveEdit" aria-pressed="${pvLiveEdit}">${pvLiveEdit ? "✓ Selesai Koreksi Teks" : "✏️ Koreksi Teks di Lembar"}</button>
+        <button class="btn sm ${pvShowFrames ? "active" : ""}" id="btnToggleFrames" aria-expanded="${pvShowFrames}" title="Atur posisi koordinat dan ukuran bingkai foto agar pas dengan desain Canva">🖼️ Atur Posisi Frame Foto (${curFrames.length})</button>
+        <button class="btn sm ${pvShowLayout ? "active" : ""}" id="btnToggleLayout" aria-expanded="${pvShowLayout}">📐 Rapikan Paragraf</button>
+        <button class="btn sm" id="btnAutoFit" title="Kecilkan font sedikit secara otomatis agar pas tanpa baris menggantung">⚡ Auto-Fit</button>
+        <button class="btn sm ${pvLiveEdit ? "active" : ""}" id="btnLiveEdit" aria-pressed="${pvLiveEdit}">${pvLiveEdit ? "✓ Selesai Koreksi Teks" : "✏️ Koreksi Teks"}</button>
         <button class="btn sm primary" id="btnPvPdf">Unduh PDF</button>
+      </div>
+    </div>
+
+    <!-- Drawer: Pengaturan Posisi & Ukuran Frame Foto -->
+    <div class="pv-frames-drawer" id="pvFramesDrawer" style="display:${pvShowFrames ? "block" : "none"}">
+      <div class="pv-layout-header">
+        <div>
+          <b>🖼️ Pengaturan Posisi & Ukuran Frame Foto (${curFrames.length} Frame Foto)</b>
+          <p class="hint" style="margin:2px 0 0">Geser koordinat (X & Y mm), ukuran, dan bentuk bingkai foto di bawah ini agar <b>pas 100% di atas bingkai desain Canva</b> sebelum dicetak ke PDF.</p>
+        </div>
+        <div class="pv-layout-acts">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600">
+            <span>Jumlah:</span>
+            <div class="seg" role="group">
+              <button type="button" class="btn sm ${curFrames.length === 1 ? "active" : ""}" data-setframes="1">1 Frame</button>
+              <button type="button" class="btn sm ${curFrames.length === 2 ? "active" : ""}" data-setframes="2">2 Frame</button>
+              <button type="button" class="btn sm ${curFrames.length === 3 ? "active" : ""}" data-setframes="3">3 Frame (Maks)</button>
+            </div>
+          </div>
+          <button class="btn sm primary" id="btnSaveFramesToClass" title="Simpan tata letak frame foto ini ke desain kelas agar otomatis dipakai semua siswa">💾 Simpan Posisi ke Desain Kelas</button>
+          <button class="btn sm ghost danger" id="btnResetFrames">↺ Reset Frame</button>
+        </div>
+      </div>
+
+      <div class="pv-frames-cards">
+        ${curFrames.map((f, i) => {
+          const pKey = f.key || (i === 0 ? "foto1" : i === 1 ? "foto2" : "foto3");
+          const pSrc = getStudentPhoto(s, pKey);
+          return `<div class="pv-frame-card" data-fidx="${i}">
+            <div class="pv-frame-card-head">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="pv-frame-thumb ${pSrc ? "has" : ""}" style="${pSrc ? `background-image:url('${pSrc}')` : ""}">
+                  ${pSrc ? "" : `<span>Foto ${i + 1}</span>`}
+                </div>
+                <div>
+                  <div style="font-weight:700;font-size:13.5px;color:var(--fg-heading)">Frame ${f.num || (i + 1)}: ${esc(f.label || `Foto ${i + 1}`)}</div>
+                  <div style="font-size:11.5px;color:var(--muted)">Target: Hal ${f.page === "first" ? "1 (Utama)" : "2 (Lanjutan)"} · Bentuk: ${SHAPES[f.shape] || f.shape || "Lingkaran"}</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                <select class="sm" data-frameprop="src" data-fidx="${i}" aria-label="Isi foto">
+                  <option value="foto1" ${f.src === "foto1" || f.src === "portrait" ? "selected" : ""}>Foto 1 (Utama)</option>
+                  <option value="foto2" ${f.src === "foto2" || f.src === "kegiatan" ? "selected" : ""}>Foto 2 (Kegiatan)</option>
+                  <option value="foto3" ${f.src === "foto3" || f.src === "extra" ? "selected" : ""}>Foto 3 (Tambahan)</option>
+                </select>
+                <select class="sm" data-frameprop="page" data-fidx="${i}" aria-label="Halaman">
+                  <option value="first" ${f.page === "first" ? "selected" : ""}>Hal 1</option>
+                  <option value="next" ${f.page === "next" ? "selected" : ""}>Hal 2</option>
+                </select>
+                <select class="sm" data-frameprop="shape" data-fidx="${i}" aria-label="Bentuk">
+                  <option value="circle" ${f.shape === "circle" ? "selected" : ""}>Lingkaran</option>
+                  <option value="rounded" ${f.shape === "rounded" ? "selected" : ""}>Membulat</option>
+                  <option value="rect" ${f.shape === "rect" ? "selected" : ""}>Persegi</option>
+                  <option value="hexagon" ${f.shape === "hexagon" ? "selected" : ""}>Heksagon</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="pv-ctrl-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px">
+              <!-- Posisi X -->
+              <div class="pv-ctrl">
+                <div class="pv-ctrl-head">
+                  <label>Posisi Kiri (X)</label>
+                  <span class="badge" id="v_fx_${i}">${f.x} mm</span>
+                </div>
+                <div class="pv-ctrl-row">
+                  <button class="btn sm ghost" data-framestep="x" data-fidx="${i}" data-val="-2">-2</button>
+                  <button class="btn sm ghost" data-framestep="x" data-fidx="${i}" data-val="-0.5">-</button>
+                  <input type="range" min="0" max="180" step="0.5" id="rg_fx_${i}" data-frameprop="x" data-fidx="${i}" value="${f.x}">
+                  <button class="btn sm ghost" data-framestep="x" data-fidx="${i}" data-val="0.5">+</button>
+                  <button class="btn sm ghost" data-framestep="x" data-fidx="${i}" data-val="2">+2</button>
+                </div>
+              </div>
+
+              <!-- Posisi Y -->
+              <div class="pv-ctrl">
+                <div class="pv-ctrl-head">
+                  <label>Posisi Atas (Y)</label>
+                  <span class="badge" id="v_fy_${i}">${f.y} mm</span>
+                </div>
+                <div class="pv-ctrl-row">
+                  <button class="btn sm ghost" data-framestep="y" data-fidx="${i}" data-val="-2">-2</button>
+                  <button class="btn sm ghost" data-framestep="y" data-fidx="${i}" data-val="-0.5">-</button>
+                  <input type="range" min="0" max="260" step="0.5" id="rg_fy_${i}" data-frameprop="y" data-fidx="${i}" value="${f.y}">
+                  <button class="btn sm ghost" data-framestep="y" data-fidx="${i}" data-val="0.5">+</button>
+                  <button class="btn sm ghost" data-framestep="y" data-fidx="${i}" data-val="2">+2</button>
+                </div>
+              </div>
+
+              <!-- Lebar W -->
+              <div class="pv-ctrl">
+                <div class="pv-ctrl-head">
+                  <label>Lebar Frame (W)</label>
+                  <span class="badge" id="v_fw_${i}">${f.w} mm</span>
+                </div>
+                <div class="pv-ctrl-row">
+                  <button class="btn sm ghost" data-framestep="w" data-fidx="${i}" data-val="-1">-</button>
+                  <input type="range" min="15" max="100" step="1" id="rg_fw_${i}" data-frameprop="w" data-fidx="${i}" value="${f.w}">
+                  <button class="btn sm ghost" data-framestep="w" data-fidx="${i}" data-val="1">+</button>
+                </div>
+              </div>
+
+              <!-- Tinggi H -->
+              <div class="pv-ctrl">
+                <div class="pv-ctrl-head">
+                  <label>Tinggi Frame (H)</label>
+                  <span class="badge" id="v_fh_${i}">${f.h} mm</span>
+                </div>
+                <div class="pv-ctrl-row">
+                  <button class="btn sm ghost" data-framestep="h" data-fidx="${i}" data-val="-1">-</button>
+                  <input type="range" min="15" max="100" step="1" id="rg_fh_${i}" data-frameprop="h" data-fidx="${i}" value="${f.h}">
+                  <button class="btn sm ghost" data-framestep="h" data-fidx="${i}" data-val="1">+</button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+        }).join("")}
       </div>
     </div>
 
@@ -1576,6 +1878,24 @@ async function renderPreview(body, s) {
         pg.classList.add("pv-page");
         pg.style.transform = `scale(${sc})`;
         slot.append(pg);
+
+        if (pvShowFrames) {
+          const liveFrames = getTemplatePhotoFrames(tpl, s);
+          const pageKey = i === 0 ? "first" : "next";
+          const pageFrames = liveFrames.filter((f) => (f.page || "first") === pageKey);
+          pageFrames.forEach((f, fIdx) => {
+            const fx = (f.x || 0) * PXMM * sc;
+            const fy = (f.y || 0) * PXMM * sc;
+            const fw = (f.w || 30) * PXMM * sc;
+            const fh = (f.h || 30) * PXMM * sc;
+            const radius = f.shape === "circle" ? "50%" : f.shape === "rounded" ? `${Math.min(fw, fh) * 0.14}px` : "4px";
+            const box = h(`<div class="pv-frame-guide-box" style="left:${fx}px;top:${fy}px;width:${fw}px;height:${fh}px;border-radius:${radius}">
+              <span class="pv-frame-guide-tag">Frame ${f.num || (fIdx + 1)}: ${esc(f.label || "Foto")}</span>
+            </div>`);
+            slot.append(box);
+          });
+        }
+
         container.append(slot);
 
         if (pvLiveEdit) {
@@ -1605,6 +1925,17 @@ async function renderPreview(body, s) {
   };
 
   await renderPagesList();
+
+  const btnToggleFrames = $("#btnToggleFrames", body);
+  if (btnToggleFrames) {
+    btnToggleFrames.onclick = () => {
+      pvShowFrames = !pvShowFrames;
+      $("#pvFramesDrawer", body).style.display = pvShowFrames ? "block" : "none";
+      btnToggleFrames.classList.toggle("active", pvShowFrames);
+      btnToggleFrames.setAttribute("aria-expanded", pvShowFrames);
+      renderPagesList();
+    };
+  }
 
   $("#btnToggleLayout", body).onclick = () => {
     pvShowLayout = !pvShowLayout;
@@ -1745,6 +2076,156 @@ async function renderPreview(body, s) {
     renderPreview(body, s);
     toast("Tata letak dikembalikan ke default desain.");
   };
+
+  const ensureFramesObj = () => {
+    s.layout = s.layout || {};
+    if (!Array.isArray(s.layout.frames)) {
+      s.layout.frames = JSON.parse(JSON.stringify(curFrames));
+    }
+    return s.layout.frames;
+  };
+
+  body.querySelectorAll("[data-frameprop]").forEach((el) => {
+    const prop = el.dataset.frameprop;
+    const fIdx = parseInt(el.dataset.fidx, 10);
+    const handler = () => {
+      const frames = ensureFramesObj();
+      if (!frames[fIdx]) return;
+      let val = el.value;
+      if (prop === "x" || prop === "y" || prop === "w" || prop === "h") {
+        val = parseFloat(val);
+        const badge = $(`#v_f${prop}_${fIdx}`, body);
+        if (badge) badge.textContent = val + " mm";
+      }
+      frames[fIdx][prop] = val;
+      if (prop === "src") {
+        frames[fIdx].key = val;
+        frames[fIdx].label = val === "foto1" ? "Foto 1 (Utama)" : val === "foto2" ? "Foto 2 (Kegiatan)" : "Foto 3 (Tambahan)";
+      }
+      touch(s);
+      queueLiveUpdate();
+    };
+    if (el.tagName === "SELECT") el.onchange = handler;
+    else el.oninput = handler;
+  });
+
+  body.querySelectorAll("[data-framestep]").forEach((btn) => {
+    btn.onclick = () => {
+      const prop = btn.dataset.framestep;
+      const fIdx = parseInt(btn.dataset.fidx, 10);
+      const step = parseFloat(btn.dataset.val);
+      const frames = ensureFramesObj();
+      if (!frames[fIdx]) return;
+      const curVal = frames[fIdx][prop] != null ? frames[fIdx][prop] : curFrames[fIdx][prop];
+      const newVal = Math.max(0, Math.round((curVal + step) * 10) / 10);
+      frames[fIdx][prop] = newVal;
+      const inp = $(`#rg_f${prop}_${fIdx}`, body);
+      if (inp) inp.value = newVal;
+      const badge = $(`#v_f${prop}_${fIdx}`, body);
+      if (badge) badge.textContent = newVal + " mm";
+      touch(s);
+      queueLiveUpdate();
+    };
+  });
+
+  body.querySelectorAll("[data-setframes]").forEach((btn) => {
+    btn.onclick = async () => {
+      const count = parseInt(btn.dataset.setframes, 10);
+      if (!count || count < 1 || count > 3) return;
+      try {
+        const activeMeta = activeTplMeta();
+        if (activeMeta.builtin) {
+          toast("Desain bawaan tidak bisa diubah langsung. Silakan buat atau upload desain Canva baru untuk mengatur jumlah frame.");
+          return;
+        }
+        const fullTpl = await resolveTpl(activeMeta);
+        fullTpl.els = fullTpl.els || [];
+        const nonPhotoEls = fullTpl.els.filter((e) => e.kind !== "foto");
+        const existingPhotos = fullTpl.els.filter((e) => e.kind === "foto");
+
+        const defaultConfigs = [
+          { id: rid(), key: "foto1", src: "foto1", page: "first", x: 148, y: 20, w: 44, h: 44, shape: "circle", border: "#8b5cf6", borderW: 1.4, num: 1, label: "Foto 1 (Utama)" },
+          { id: rid(), key: "foto2", src: "foto2", page: "first", x: 148, y: 68, w: 44, h: 44, shape: "circle", border: "#8b5cf6", borderW: 1.4, num: 2, label: "Foto 2 (Kegiatan)" },
+          { id: rid(), key: "foto3", src: "foto3", page: "next", x: 152, y: 35, w: 38, h: 38, shape: "circle", border: "#8b5cf6", borderW: 1.4, num: 3, label: "Foto 3 (Tambahan)" }
+        ];
+
+        const newPhotoEls = [];
+        for (let idx = 0; idx < count; idx++) {
+          if (existingPhotos[idx]) {
+            newPhotoEls.push(existingPhotos[idx]);
+          } else {
+            newPhotoEls.push({ kind: "foto", ...defaultConfigs[idx] });
+          }
+        }
+
+        fullTpl.els = [...nonPhotoEls, ...newPhotoEls];
+        await saveTemplate(fullTpl, {});
+        if (s.layout?.frames) delete s.layout.frames;
+        touch(s);
+        renderPreview(body, s);
+        toast(`✨ Jumlah frame berhasil disesuaikan menjadi ${count} frame!`);
+      } catch (err) {
+        toast("Gagal mengubah jumlah frame: " + (err.message || err));
+      }
+    };
+  });
+
+  const btnSaveFrames = $("#btnSaveFramesToClass", body);
+  if (btnSaveFrames) {
+    btnSaveFrames.onclick = async () => {
+      try {
+        const activeMeta = activeTplMeta();
+        if (activeMeta.builtin) {
+          toast("Desain bawaan tidak bisa diubah langsung. Silakan buat atau upload desain Canva baru.");
+          return;
+        }
+        const fullTpl = await resolveTpl(activeMeta);
+        const liveFrames = getTemplatePhotoFrames(tpl, s);
+        fullTpl.els = fullTpl.els || [];
+        const photoEls = fullTpl.els.filter((e) => e.kind === "foto");
+
+        liveFrames.forEach((lf, idx) => {
+          let targetEl = photoEls[idx] || fullTpl.els.find((e) => e.kind === "foto" && (e.id === lf.id || e.key === lf.key));
+          if (!targetEl) {
+            targetEl = { id: rid(), kind: "foto" };
+            fullTpl.els.push(targetEl);
+          }
+          targetEl.x = lf.x;
+          targetEl.y = lf.y;
+          targetEl.w = lf.w;
+          targetEl.h = lf.h;
+          targetEl.shape = lf.shape || "circle";
+          targetEl.border = lf.border || "#8b5cf6";
+          targetEl.borderW = lf.borderW ?? 1.4;
+          targetEl.page = lf.page || "first";
+          targetEl.src = lf.src || (idx === 0 ? "foto1" : idx === 1 ? "foto2" : "foto3");
+          targetEl.key = lf.key || targetEl.src;
+          targetEl.num = lf.num || (idx + 1);
+          targetEl.label = lf.label || `Foto ${idx + 1}`;
+        });
+
+        await saveTemplate(fullTpl, {});
+        if (s.layout?.frames) delete s.layout.frames;
+        touch(s);
+        toast("✅ Posisi frame foto berhasil disimpan ke Desain Kelas untuk seluruh siswa!");
+        renderPreview(body, s);
+      } catch (e) {
+        toast("Gagal menyimpan ke desain kelas: " + (e.message || e));
+      }
+    };
+  }
+
+  const btnResetFrames = $("#btnResetFrames", body);
+  if (btnResetFrames) {
+    btnResetFrames.onclick = () => {
+      if (s.layout?.frames) {
+        delete s.layout.frames;
+        touch(s);
+      }
+      renderPreview(body, s);
+      toast("Pengaturan frame foto dikembalikan ke default desain.");
+    };
+  }
 }
 
 /* ================= Aksi: AI, unduh ================= */
