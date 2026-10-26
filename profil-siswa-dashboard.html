@@ -487,24 +487,69 @@ const BUILTIN = { id: "builtin", nama: "Bawaan: bintang & heksagon", builtin: tr
 const T = { list: [], imgs: new Map() };
 const TPL_LS = "profil-siswa-tpl-v1";
 
-function newTemplate(photoCount = 2, photoShape = "circle", photoBorder = "#8b5cf6") {
-  const els = [
-    { id: rid(), kind: "body", page: "first", x: 18, y: 88, w: 174, h: 190 },
-    { id: rid(), kind: "body", page: "next", x: 18, y: 30, w: 174, h: 248 },
-    { id: rid(), kind: "nama", page: "first", x: 18, y: 34, w: 120, h: 15, font: "Luckiest Guy", color: "#7be3f2", stroke: "#8b5cf6", strokeW: 1.1, shadow: true, align: "left", upper: true },
-    { id: rid(), kind: "kelas", page: "first", x: 18, y: 51, w: 100, h: 12, font: "Luckiest Guy", color: "#7be3f2", stroke: "#8b5cf6", strokeW: 1, shadow: true, align: "left", upper: true },
-  ];
-  if (photoCount === 1) {
-    els.push({ id: rid(), kind: "foto", page: "first", x: 146, y: 20, w: 46, h: 46, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
-  } else if (photoCount === 2) {
-    els.push({ id: rid(), kind: "foto", page: "first", x: 148, y: 15, w: 44, h: 44, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
-    els.push({ id: rid(), kind: "foto", page: "first", x: 148, y: 64, w: 44, h: 44, src: "foto2", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 2 (Kegiatan)" });
+function getLayoutPresetElements(presetKey = "fotoKiri", photoCount = 2, photoShape = "rounded", photoBorder = "#ffffff") {
+  if (presetKey === "fotoKiri") {
+    // Foto di Kiri (klip / awan), Nama & Kelas di Kanan (kotak Nama Lengkap Canva)
+    const els = [
+      { id: rid(), kind: "body", page: "first", x: 18, y: 86, w: 174, h: 192 },
+      { id: rid(), kind: "body", page: "next", x: 18, y: 30, w: 174, h: 248 },
+      { id: rid(), kind: "nama", page: "first", x: 118, y: 34, w: 76, h: 14, font: "Lexend", color: "#1e1b4b", stroke: "#ffffff", strokeW: 0.6, shadow: false, align: "center", upper: true, sizePt: 15 },
+      { id: rid(), kind: "kelas", page: "first", x: 118, y: 50, w: 76, h: 10, font: "Lexend", color: "#475569", stroke: "#ffffff", strokeW: 0.4, shadow: false, align: "center", upper: true, sizePt: 11 },
+    ];
+    if (photoCount === 1) {
+      els.push({ id: rid(), kind: "foto", page: "first", x: 22, y: 24, w: 48, h: 48, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+    } else if (photoCount === 2) {
+      els.push({ id: rid(), kind: "foto", page: "first", x: 22, y: 26, w: 40, h: 42, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+      els.push({ id: rid(), kind: "foto", page: "first", x: 68, y: 26, w: 40, h: 42, src: "foto2", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 2 (Kegiatan)" });
+    } else {
+      els.push({ id: rid(), kind: "foto", page: "first", x: 18, y: 24, w: 38, h: 38, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+      els.push({ id: rid(), kind: "foto", page: "first", x: 60, y: 24, w: 38, h: 38, src: "foto2", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 2 (Kegiatan)" });
+      els.push({ id: rid(), kind: "foto", page: "first", x: 39, y: 55, w: 38, h: 30, src: "foto3", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 3 (Tambahan)" });
+    }
+    return els;
+  } else if (presetKey === "fotoAtas") {
+    // Foto berjajar di atas, Nama di bawah foto
+    const els = [
+      { id: rid(), kind: "body", page: "first", x: 18, y: 86, w: 174, h: 192 },
+      { id: rid(), kind: "body", page: "next", x: 18, y: 30, w: 174, h: 248 },
+      { id: rid(), kind: "nama", page: "first", x: 18, y: 56, w: 174, h: 13, font: "Lexend", color: "#1e1b4b", stroke: "#ffffff", strokeW: 0.6, shadow: false, align: "center", upper: true, sizePt: 16 },
+      { id: rid(), kind: "kelas", page: "first", x: 18, y: 70, w: 174, h: 10, font: "Lexend", color: "#475569", stroke: "#ffffff", strokeW: 0.4, shadow: false, align: "center", upper: true, sizePt: 11 },
+    ];
+    if (photoCount === 1) {
+      els.push({ id: rid(), kind: "foto", page: "first", x: 82, y: 12, w: 46, h: 42, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+    } else if (photoCount === 2) {
+      els.push({ id: rid(), kind: "foto", page: "first", x: 55, y: 12, w: 44, h: 40, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+      els.push({ id: rid(), kind: "foto", page: "first", x: 110, y: 12, w: 44, h: 40, src: "foto2", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 2 (Kegiatan)" });
+    } else {
+      els.push({ id: rid(), kind: "foto", page: "first", x: 28, y: 12, w: 44, h: 40, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+      els.push({ id: rid(), kind: "foto", page: "first", x: 83, y: 12, w: 44, h: 40, src: "foto2", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 2 (Kegiatan)" });
+      els.push({ id: rid(), kind: "foto", page: "first", x: 138, y: 12, w: 44, h: 40, src: "foto3", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 3 (Tambahan)" });
+    }
+    return els;
   } else {
-    // 3 frame maksimal
-    els.push({ id: rid(), kind: "foto", page: "first", x: 152, y: 8, w: 38, h: 36, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
-    els.push({ id: rid(), kind: "foto", page: "first", x: 120, y: 28, w: 38, h: 36, src: "foto2", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 2 (Kegiatan)" });
-    els.push({ id: rid(), kind: "foto", page: "first", x: 152, y: 48, w: 38, h: 36, src: "foto3", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 3 (Tambahan)" });
+    // fotoKanan (Standar: Nama di Kiri, Foto di Kanan)
+    const els = [
+      { id: rid(), kind: "body", page: "first", x: 18, y: 88, w: 174, h: 190 },
+      { id: rid(), kind: "body", page: "next", x: 18, y: 30, w: 174, h: 248 },
+      { id: rid(), kind: "nama", page: "first", x: 18, y: 34, w: 120, h: 15, font: "Lexend", color: "#1e1b4b", stroke: "#ffffff", strokeW: 0.6, shadow: false, align: "left", upper: true, sizePt: 16 },
+      { id: rid(), kind: "kelas", page: "first", x: 18, y: 51, w: 100, h: 12, font: "Lexend", color: "#475569", stroke: "#ffffff", strokeW: 0.4, shadow: false, align: "left", upper: true, sizePt: 11 },
+    ];
+    if (photoCount === 1) {
+      els.push({ id: rid(), kind: "foto", page: "first", x: 146, y: 20, w: 46, h: 46, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+    } else if (photoCount === 2) {
+      els.push({ id: rid(), kind: "foto", page: "first", x: 148, y: 15, w: 44, h: 44, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+      els.push({ id: rid(), kind: "foto", page: "first", x: 148, y: 64, w: 44, h: 44, src: "foto2", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 2 (Kegiatan)" });
+    } else {
+      els.push({ id: rid(), kind: "foto", page: "first", x: 152, y: 8, w: 38, h: 36, src: "foto1", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 1 (Utama)" });
+      els.push({ id: rid(), kind: "foto", page: "first", x: 120, y: 28, w: 38, h: 36, src: "foto2", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 2 (Kegiatan)" });
+      els.push({ id: rid(), kind: "foto", page: "first", x: 152, y: 48, w: 38, h: 36, src: "foto3", shape: photoShape, border: photoBorder, borderW: 1.4, label: "Foto 3 (Tambahan)" });
+    }
+    return els;
   }
+}
+
+function newTemplate(photoCount = 2, photoShape = "rounded", photoBorder = "#ffffff", layoutPreset = "fotoKiri") {
+  const els = getLayoutPresetElements(layoutPreset, photoCount, photoShape, photoBorder);
   return { id: "t_" + rid(), type: "meta", nama: "Desain baru", createdAt: Date.now(), bg: { first: false, next: false }, body: { ...DEFAULT_BODY }, els };
 }
 const lsTpl = () => { try { return JSON.parse(localStorage.getItem(TPL_LS)) || { list: [], imgs: {} }; } catch (e) { return { list: [], imgs: {} }; } };
@@ -613,10 +658,11 @@ function drawTextEl(ctx, text, el) {
   if (!text) return;
   const t = el.upper ? text.toUpperCase() : text;
   const x = el.x * MM, y = el.y * MM, w = el.w * MM, hh = el.h * MM, lw = (el.strokeW || 0) * MM;
-  const weight = ["Poppins", "Fredoka", "Baloo 2", "Lexend"].includes(el.font) ? 700 : 400;
-  let size = hh * 0.82;
-  for (; size > 8; size -= 1) { ctx.font = `${weight} ${size}px "${el.font}"`; if (ctx.measureText(t).width + lw <= w) break; }
-  ctx.font = `${weight} ${size}px "${el.font}"`; ctx.lineJoin = "round"; ctx.textBaseline = "middle";
+  const fontName = el.font || "Lexend";
+  const weight = ["Poppins", "Fredoka", "Baloo 2", "Lexend"].includes(fontName) ? 700 : 400;
+  let size = el.sizePt ? Math.round(el.sizePt * PT) : hh * 0.82;
+  for (; size > 8; size -= 1) { ctx.font = `${weight} ${size}px "${fontName}"`; if (ctx.measureText(t).width + lw <= w) break; }
+  ctx.font = `${weight} ${size}px "${fontName}"`; ctx.lineJoin = "round"; ctx.textBaseline = "middle";
   ctx.textAlign = el.align || "left";
   const tx = el.align === "center" ? x + w / 2 : el.align === "right" ? x + w - lw / 2 : x + lw / 2, ty = y + hh / 2;
   if (el.shadow) { ctx.fillStyle = el.stroke || C.purpleDark; ctx.strokeStyle = el.stroke || C.purpleDark; ctx.lineWidth = lw; ctx.globalAlpha = .85;
@@ -656,7 +702,11 @@ async function renderLayer(tpl, page, s) {
     drawPhotoEl(ctx, await loadImg(imgData), effEl);
   }
   for (const el of (tpl.els || []).filter((e) => e.page === page && e.kind !== "body" && e.kind !== "foto")) {
-    drawTextEl(ctx, el.kind === "nama" ? (s ? s.nama : "Nama Siswa") : (S.kelas?.namaKelas || "Kelas"), el);
+    const effEl = { ...el };
+    const ov = s?.layout?.[el.kind];
+    if (ov) Object.assign(effEl, ov);
+    if (effEl.hidden) continue;
+    drawTextEl(ctx, el.kind === "nama" ? (s ? s.nama : "Nama Siswa") : (S.kelas?.namaKelas || "Kelas"), effEl);
   }
   return cv.toDataURL("image/jpeg", 0.92);
 }
@@ -877,28 +927,54 @@ async function openUploadCanvaModal() {
       <div id="canvaFrameConfig" style="margin-top:16px;padding:14px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--r-sm)">
         <div style="font-weight:700;font-size:13.5px;color:var(--fg-heading);margin-bottom:4px">🖼️ Pengaturan Frame Foto Desain</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Tentukan berapa foto yang ada pada desain Canva bulan ini (maksimal 3 frame):</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
           <label class="radio-card"><input type="radio" name="canvaPhotoCount" value="1"> <span><b>1 Frame</b><br><small style="color:var(--muted)">1 Foto Utama</small></span></label>
           <label class="radio-card active"><input type="radio" name="canvaPhotoCount" value="2" checked> <span><b>2 Frame</b><br><small style="color:var(--muted)">2 Foto Siswa</small></span></label>
           <label class="radio-card"><input type="radio" name="canvaPhotoCount" value="3"> <span><b>3 Frame</b><br><small style="color:var(--muted)">Maksimal 3 Foto</small></span></label>
         </div>
+
+        <div style="font-weight:700;font-size:13px;color:var(--fg-heading);margin-bottom:6px">📐 Preset Posisi Foto & Nama (Sesuai Desain Canva Anda)</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:8px;margin-bottom:14px">
+          <label class="radio-card active" style="flex:1">
+            <input type="radio" name="canvaLayoutPreset" value="fotoKiri" checked>
+            <span>
+              <b>👈 Foto di Kiri, Nama di Kanan</b><br>
+              <small style="color:var(--muted)">Foto di klip kiri, kotak nama siswa di kanan atas</small>
+            </span>
+          </label>
+          <label class="radio-card" style="flex:1">
+            <input type="radio" name="canvaLayoutPreset" value="fotoKanan">
+            <span>
+              <b>👉 Foto di Kanan, Nama di Kiri</b><br>
+              <small style="color:var(--muted)">Nama di kiri atas, foto siswa di kanan atas</small>
+            </span>
+          </label>
+          <label class="radio-card" style="flex:1">
+            <input type="radio" name="canvaLayoutPreset" value="fotoAtas">
+            <span>
+              <b>⬆️ Foto Berjajar di Atas</b><br>
+              <small style="color:var(--muted)">Foto berjejer di atas, nama siswa di bawah foto</small>
+            </span>
+          </label>
+        </div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div class="f">
             <label for="canvaPhotoShape">Bentuk Frame Foto</label>
             <select id="canvaPhotoShape">
+              <option value="rounded" selected>Kotak Membulat (Rounded)</option>
               <option value="circle">Lingkaran (Bulat)</option>
-              <option value="rounded">Kotak Membulat</option>
               <option value="rect">Kotak Persegi</option>
               <option value="hexagon">Heksagon (Segienam)</option>
             </select>
           </div>
           <div class="f">
             <label for="canvaPhotoBorder">Warna Garis Tepi Frame</label>
-            <input type="color" id="canvaPhotoBorder" value="#8b5cf6">
+            <input type="color" id="canvaPhotoBorder" value="#ffffff">
           </div>
         </div>
         <div style="margin-top:8px;font-size:11.5px;color:var(--muted);line-height:1.4">
-          💡 <i>Letak posisi koordinat (X & Y mm) dapat disesuaikan lewat tombol <b>"Atur Posisi Frame Foto"</b> di tab Pratinjau agar pas 100% dengan ilustrasi Canva.</i>
+          💡 <i>Letak posisi koordinat (X & Y mm), nama siswa, dan tinggi paragraf dapat disesuaikan lewat tombol <b>"Atur Posisi Foto & Nama"</b> di tab Pratinjau agar pas 100% dengan ilustrasi Canva.</i>
         </div>
       </div>
 
@@ -924,9 +1000,13 @@ async function openUploadCanvaModal() {
   $("#upClose", el).onclick = close;
   $("#upCancel", el).onclick = close;
 
-  el.querySelectorAll("input[name='canvaPhotoCount']").forEach((r) => {
+  el.querySelectorAll("input[name='canvaPhotoCount'], input[name='canvaLayoutPreset']").forEach((r) => {
     r.onchange = () => {
-      el.querySelectorAll(".radio-card").forEach((c) => c.classList.toggle("active", c.contains(r) && r.checked));
+      const gName = r.name;
+      el.querySelectorAll(`input[name='${gName}']`).forEach((other) => {
+        const card = other.closest(".radio-card");
+        if (card) card.classList.toggle("active", other.checked);
+      });
     };
   });
 
@@ -988,9 +1068,10 @@ async function openUploadCanvaModal() {
 
     try {
       const pCount = parseInt($("input[name='canvaPhotoCount']:checked", el)?.value || "2", 10);
-      const pShape = $("#canvaPhotoShape", el)?.value || "circle";
-      const pBorder = $("#canvaPhotoBorder", el)?.value || "#8b5cf6";
-      const tpl = newTemplate(pCount, pShape, pBorder);
+      const pPreset = $("input[name='canvaLayoutPreset']:checked", el)?.value || "fotoKiri";
+      const pShape = $("#canvaPhotoShape", el)?.value || "rounded";
+      const pBorder = $("#canvaPhotoBorder", el)?.value || "#ffffff";
+      const tpl = newTemplate(pCount, pShape, pBorder, pPreset);
       tpl.nama = $("#canvaName", el).value.trim() || defName;
       const imgs = { first: extracted.first, next: extracted.next || extracted.first };
       const saved = await saveTemplate(tpl, imgs);
@@ -1638,6 +1719,8 @@ async function renderPreview(body, s) {
   const curBox1 = bodyBox(tpl, "first", s);
   const curBox2 = bodyBox(tpl, "next", s);
   const curFrames = getTemplatePhotoFrames(tpl, s);
+  const curNamaEl = { ...(tpl.els?.find((e) => e.kind === "nama") || { x: 118, y: 34, sizePt: 15, align: "center", hidden: false }), ...(s.layout?.nama || {}) };
+  const curKelasEl = { ...(tpl.els?.find((e) => e.kind === "kelas") || { x: 118, y: 50, sizePt: 11, align: "center", hidden: false }), ...(s.layout?.kelas || {}) };
 
   body.replaceChildren(h(`<div class="preview-wrap">
     <div class="pv-toolbar">
@@ -1646,7 +1729,7 @@ async function renderPreview(body, s) {
         <span class="pv-status-chip" id="pvStatusChip"></span>
       </div>
       <div class="pv-actions">
-        <button class="btn sm ${pvShowFrames ? "active" : ""}" id="btnToggleFrames" aria-expanded="${pvShowFrames}" title="Atur posisi koordinat dan ukuran bingkai foto agar pas dengan desain Canva">🖼️ Atur Posisi Frame Foto (${curFrames.length})</button>
+        <button class="btn sm ${pvShowFrames ? "active" : ""}" id="btnToggleFrames" aria-expanded="${pvShowFrames}" title="Atur posisi koordinat foto, nama siswa, dan preset tata letak agar pas dengan desain Canva">🖼️ Atur Posisi Foto & Nama (${curFrames.length})</button>
         <button class="btn sm ${pvShowLayout ? "active" : ""}" id="btnToggleLayout" aria-expanded="${pvShowLayout}">📐 Rapikan Paragraf</button>
         <button class="btn sm" id="btnAutoFit" title="Kecilkan font sedikit secara otomatis agar pas tanpa baris menggantung">⚡ Auto-Fit</button>
         <button class="btn sm ${pvLiveEdit ? "active" : ""}" id="btnLiveEdit" aria-pressed="${pvLiveEdit}">${pvLiveEdit ? "✓ Selesai Koreksi Teks" : "✏️ Koreksi Teks"}</button>
@@ -1658,8 +1741,8 @@ async function renderPreview(body, s) {
     <div class="pv-frames-drawer" id="pvFramesDrawer" style="display:${pvShowFrames ? "block" : "none"}">
       <div class="pv-layout-header">
         <div>
-          <b>🖼️ Pengaturan Posisi & Ukuran Frame Foto (${curFrames.length} Frame Foto)</b>
-          <p class="hint" style="margin:2px 0 0">Geser koordinat (X & Y mm), ukuran, dan bentuk bingkai foto di bawah ini agar <b>pas 100% di atas bingkai desain Canva</b> sebelum dicetak ke PDF.</p>
+          <b>🖼️ Pengaturan Posisi Foto & Nama Siswa (${curFrames.length} Frame Foto)</b>
+          <p class="hint" style="margin:2px 0 0">Pilih preset cepat di bawah atau geser koordinat (X & Y mm) agar bingkai foto dan nama siswa <b>pas 100% di atas desain Canva</b>.</p>
         </div>
         <div class="pv-layout-acts">
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600">
@@ -1670,9 +1753,17 @@ async function renderPreview(body, s) {
               <button type="button" class="btn sm ${curFrames.length === 3 ? "active" : ""}" data-setframes="3">3 Frame (Maks)</button>
             </div>
           </div>
-          <button class="btn sm primary" id="btnSaveFramesToClass" title="Simpan tata letak frame foto ini ke desain kelas agar otomatis dipakai semua siswa">💾 Simpan Posisi ke Desain Kelas</button>
-          <button class="btn sm ghost danger" id="btnResetFrames">↺ Reset Frame</button>
+          <button class="btn sm primary" id="btnSaveFramesToClass" title="Simpan tata letak frame foto dan posisi nama ini ke desain kelas agar otomatis dipakai semua siswa">💾 Simpan Posisi ke Desain Kelas</button>
+          <button class="btn sm ghost danger" id="btnResetFrames">↺ Reset</button>
         </div>
+      </div>
+
+      <!-- Quick Layout Presets Toolbar -->
+      <div class="pv-preset-bar">
+        <span class="pv-preset-label">⚡ Preset Cepat:</span>
+        <button type="button" class="pv-preset-btn" data-applypreset="fotoKiri" title="Pasang foto di klip kiri atas dan nama di kanan atas (persis desain Canva)">👈 Foto di Kiri, Nama di Kanan</button>
+        <button type="button" class="pv-preset-btn" data-applypreset="fotoKanan" title="Pasang nama di kiri dan foto di kanan">👉 Foto di Kanan, Nama di Kiri</button>
+        <button type="button" class="pv-preset-btn" data-applypreset="fotoAtas" title="Pasang foto berjajar horizontal di atas">⬆️ Foto Berjajar di Atas</button>
       </div>
 
       <div class="pv-frames-cards">
@@ -1701,8 +1792,8 @@ async function renderPreview(body, s) {
                   <option value="next" ${f.page === "next" ? "selected" : ""}>Hal 2</option>
                 </select>
                 <select class="sm" data-frameprop="shape" data-fidx="${i}" aria-label="Bentuk">
+                  <option value="rounded" ${f.shape === "rounded" ? "selected" : ""}>Kotak Membulat</option>
                   <option value="circle" ${f.shape === "circle" ? "selected" : ""}>Lingkaran</option>
-                  <option value="rounded" ${f.shape === "rounded" ? "selected" : ""}>Membulat</option>
                   <option value="rect" ${f.shape === "rect" ? "selected" : ""}>Persegi</option>
                   <option value="hexagon" ${f.shape === "hexagon" ? "selected" : ""}>Heksagon</option>
                 </select>
@@ -1768,6 +1859,85 @@ async function renderPreview(body, s) {
             </div>
           </div>`;
         }).join("")}
+
+        <!-- Card Pengaturan Posisi Nama Siswa & Kelas -->
+        <div class="pv-frame-card" style="margin-top:14px;background:var(--surface)">
+          <div class="pv-frame-card-head">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:22px">👤</span>
+              <div>
+                <div style="font-weight:700;font-size:13.5px;color:var(--fg-heading)">Posisi Nama Siswa & Kelas (Header)</div>
+                <div style="font-size:11.5px;color:var(--muted)">Geser koordinat agar teks nama siswa pas berada di dalam kotak nama desain Canva Anda.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;cursor:pointer">
+                <input type="checkbox" id="chkHideNama" ${curNamaEl.hidden ? "checked" : ""}> Sembunyikan Nama Siswa
+              </label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;cursor:pointer">
+                <input type="checkbox" id="chkHideKelas" ${curKelasEl.hidden ? "checked" : ""}> Sembunyikan Kelas
+              </label>
+            </div>
+          </div>
+
+          <div class="pv-ctrl-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px">
+            <!-- Posisi X Nama -->
+            <div class="pv-ctrl">
+              <div class="pv-ctrl-head">
+                <label>Posisi Kiri Nama (X)</label>
+                <span class="badge" id="v_nx">${curNamaEl.x} mm</span>
+              </div>
+              <div class="pv-ctrl-row">
+                <button class="btn sm ghost" data-namastep="x" data-val="-2">-2</button>
+                <button class="btn sm ghost" data-namastep="x" data-val="-0.5">-</button>
+                <input type="range" min="0" max="180" step="0.5" id="rg_nx" data-namaprop="x" value="${curNamaEl.x}">
+                <button class="btn sm ghost" data-namastep="x" data-val="0.5">+</button>
+                <button class="btn sm ghost" data-namastep="x" data-val="2">+2</button>
+              </div>
+            </div>
+
+            <!-- Posisi Y Nama -->
+            <div class="pv-ctrl">
+              <div class="pv-ctrl-head">
+                <label>Posisi Atas Nama (Y)</label>
+                <span class="badge" id="v_ny">${curNamaEl.y} mm</span>
+              </div>
+              <div class="pv-ctrl-row">
+                <button class="btn sm ghost" data-namastep="y" data-val="-2">-2</button>
+                <button class="btn sm ghost" data-namastep="y" data-val="-0.5">-</button>
+                <input type="range" min="5" max="140" step="0.5" id="rg_ny" data-namaprop="y" value="${curNamaEl.y}">
+                <button class="btn sm ghost" data-namastep="y" data-val="0.5">+</button>
+                <button class="btn sm ghost" data-namastep="y" data-val="2">+2</button>
+              </div>
+            </div>
+
+            <!-- Ukuran Font Nama -->
+            <div class="pv-ctrl">
+              <div class="pv-ctrl-head">
+                <label>Ukuran Font Nama</label>
+                <span class="badge" id="v_ns">${curNamaEl.sizePt || 15} pt</span>
+              </div>
+              <div class="pv-ctrl-row">
+                <button class="btn sm ghost" data-namastep="sizePt" data-val="-1">-</button>
+                <input type="range" min="10" max="28" step="0.5" id="rg_ns" data-namaprop="sizePt" value="${curNamaEl.sizePt || 15}">
+                <button class="btn sm ghost" data-namastep="sizePt" data-val="1">+</button>
+              </div>
+            </div>
+
+            <!-- Perataan / Align Nama -->
+            <div class="pv-ctrl">
+              <div class="pv-ctrl-head">
+                <label>Rata Teks Nama</label>
+                <span class="badge" id="v_na">${curNamaEl.align || "center"}</span>
+              </div>
+              <div class="pv-ctrl-row" style="gap:6px">
+                <button class="btn sm ${curNamaEl.align === "left" ? "active" : ""}" data-namaalign="left">Kiri</button>
+                <button class="btn sm ${(!curNamaEl.align || curNamaEl.align === "center") ? "active" : ""}" data-namaalign="center">Tengah</button>
+                <button class="btn sm ${curNamaEl.align === "right" ? "active" : ""}" data-namaalign="right">Kanan</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1909,6 +2079,20 @@ async function renderPreview(body, s) {
             </div>`);
             slot.append(box);
           });
+
+          if (i === 0) {
+            const liveNama = { ...(tpl.els?.find((e) => e.kind === "nama") || { x: 118, y: 34, w: 76, h: 14 }), ...(s.layout?.nama || {}) };
+            if (!liveNama.hidden) {
+              const nx = (liveNama.x || 0) * PXMM * sc;
+              const ny = (liveNama.y || 0) * PXMM * sc;
+              const nw = (liveNama.w || 76) * PXMM * sc;
+              const nh = (liveNama.h || 14) * PXMM * sc;
+              const nameBox = h(`<div class="pv-frame-guide-box" style="left:${nx}px;top:${ny}px;width:${nw}px;height:${nh}px;border-color:#06b6d4;border-radius:4px">
+                <span class="pv-frame-guide-tag" style="background:#06b6d4">👤 Nama: ${esc(s.nama || "Siswa")}</span>
+              </div>`);
+              slot.append(nameBox);
+            }
+          }
         }
 
         container.append(slot);
@@ -2143,6 +2327,132 @@ async function renderPreview(body, s) {
     };
   });
 
+  // Preset Cepat applicator
+  body.querySelectorAll("[data-applypreset]").forEach((btn) => {
+    btn.onclick = () => {
+      const presetKey = btn.dataset.applypreset;
+      const count = curFrames.length || 2;
+      const shape = curFrames[0]?.shape || "rounded";
+      const border = curFrames[0]?.border || "#ffffff";
+      const presetEls = getLayoutPresetElements(presetKey, count, shape, border);
+
+      s.layout = s.layout || {};
+      s.layout.frames = [];
+      presetEls.filter((e) => e.kind === "foto").forEach((f, idx) => {
+        s.layout.frames.push({
+          id: curFrames[idx]?.id || rid(),
+          key: f.key || `foto${idx + 1}`,
+          src: f.src || (idx === 0 ? "foto1" : idx === 1 ? "foto2" : "foto3"),
+          page: f.page || "first",
+          x: f.x,
+          y: f.y,
+          w: f.w,
+          h: f.h,
+          shape: f.shape,
+          border: f.border,
+          borderW: f.borderW ?? 1.4,
+          num: f.num || (idx + 1),
+          label: f.label || `Foto ${idx + 1}`
+        });
+      });
+
+      const nEl = presetEls.find((e) => e.kind === "nama");
+      if (nEl) {
+        s.layout.nama = { x: nEl.x, y: nEl.y, w: nEl.w, h: nEl.h, sizePt: nEl.sizePt || 15, align: nEl.align || "center", font: nEl.font || "Lexend", color: nEl.color || "#1e1b4b", stroke: nEl.stroke || "#ffffff", strokeW: nEl.strokeW || 0.6, shadow: false, hidden: false };
+      }
+      const kEl = presetEls.find((e) => e.kind === "kelas");
+      if (kEl) {
+        s.layout.kelas = { x: kEl.x, y: kEl.y, w: kEl.w, h: kEl.h, sizePt: kEl.sizePt || 11, align: kEl.align || "center", font: kEl.font || "Lexend", color: kEl.color || "#475569", stroke: kEl.stroke || "#ffffff", strokeW: kEl.strokeW || 0.4, shadow: false, hidden: false };
+      }
+
+      const bEl = presetEls.find((e) => e.kind === "body" && e.page === "first");
+      if (bEl) {
+        s.layout.firstTopMm = bEl.y;
+        s.layout.firstHeightMm = bEl.h;
+      }
+
+      touch(s);
+      toast(`✨ Preset "${presetKey === "fotoKiri" ? "Foto di Kiri, Nama di Kanan" : presetKey === "fotoKanan" ? "Foto di Kanan, Nama di Kiri" : "Foto Berjajar di Atas"}" diterapkan! Klik "Simpan Posisi ke Desain Kelas" jika sudah pas.`);
+      renderPreview(body, s);
+    };
+  });
+
+  // Nama Siswa & Kelas controls
+  const ensureNamaObj = () => {
+    s.layout = s.layout || {};
+    if (!s.layout.nama) {
+      s.layout.nama = { ...curNamaEl };
+    }
+    return s.layout.nama;
+  };
+
+  body.querySelectorAll("[data-namaprop]").forEach((el) => {
+    const prop = el.dataset.namaprop;
+    el.oninput = () => {
+      const nama = ensureNamaObj();
+      let val = el.value;
+      if (prop === "x" || prop === "y" || prop === "sizePt") {
+        val = parseFloat(val);
+        const badge = $(`#v_n${prop === "sizePt" ? "s" : prop}`, body);
+        if (badge) badge.textContent = val + (prop === "sizePt" ? " pt" : " mm");
+      }
+      nama[prop] = val;
+      touch(s);
+      queueLiveUpdate();
+    };
+  });
+
+  body.querySelectorAll("[data-namastep]").forEach((btn) => {
+    btn.onclick = () => {
+      const prop = btn.dataset.namastep;
+      const step = parseFloat(btn.dataset.val);
+      const nama = ensureNamaObj();
+      const curVal = nama[prop] != null ? nama[prop] : curNamaEl[prop];
+      const newVal = Math.max(0, Math.round((curVal + step) * 10) / 10);
+      nama[prop] = newVal;
+      const inp = $(`#rg_n${prop === "sizePt" ? "s" : prop}`, body);
+      if (inp) inp.value = newVal;
+      const badge = $(`#v_n${prop === "sizePt" ? "s" : prop}`, body);
+      if (badge) badge.textContent = newVal + (prop === "sizePt" ? " pt" : " mm");
+      touch(s);
+      queueLiveUpdate();
+    };
+  });
+
+  body.querySelectorAll("[data-namaalign]").forEach((btn) => {
+    btn.onclick = () => {
+      const align = btn.dataset.namaalign;
+      const nama = ensureNamaObj();
+      nama.align = align;
+      body.querySelectorAll("[data-namaalign]").forEach((b) => b.classList.toggle("active", b === btn));
+      const badge = $("#v_na", body);
+      if (badge) badge.textContent = align;
+      touch(s);
+      queueLiveUpdate();
+    };
+  });
+
+  const chkHideNama = $("#chkHideNama", body);
+  if (chkHideNama) {
+    chkHideNama.onchange = () => {
+      const nama = ensureNamaObj();
+      nama.hidden = chkHideNama.checked;
+      touch(s);
+      queueLiveUpdate();
+    };
+  }
+
+  const chkHideKelas = $("#chkHideKelas", body);
+  if (chkHideKelas) {
+    chkHideKelas.onchange = () => {
+      s.layout = s.layout || {};
+      s.layout.kelas = s.layout.kelas || { ...curKelasEl };
+      s.layout.kelas.hidden = chkHideKelas.checked;
+      touch(s);
+      queueLiveUpdate();
+    };
+  }
+
   body.querySelectorAll("[data-setframes]").forEach((btn) => {
     btn.onclick = async () => {
       const count = parseInt(btn.dataset.setframes, 10);
@@ -2159,9 +2469,9 @@ async function renderPreview(body, s) {
         const existingPhotos = fullTpl.els.filter((e) => e.kind === "foto");
 
         const defaultConfigs = [
-          { id: rid(), key: "foto1", src: "foto1", page: "first", x: 148, y: 20, w: 44, h: 44, shape: "circle", border: "#8b5cf6", borderW: 1.4, num: 1, label: "Foto 1 (Utama)" },
-          { id: rid(), key: "foto2", src: "foto2", page: "first", x: 148, y: 68, w: 44, h: 44, shape: "circle", border: "#8b5cf6", borderW: 1.4, num: 2, label: "Foto 2 (Kegiatan)" },
-          { id: rid(), key: "foto3", src: "foto3", page: "next", x: 152, y: 35, w: 38, h: 38, shape: "circle", border: "#8b5cf6", borderW: 1.4, num: 3, label: "Foto 3 (Tambahan)" }
+          { id: rid(), key: "foto1", src: "foto1", page: "first", x: 22, y: 26, w: 40, h: 42, shape: "rounded", border: "#ffffff", borderW: 1.4, num: 1, label: "Foto 1 (Utama)" },
+          { id: rid(), key: "foto2", src: "foto2", page: "first", x: 68, y: 26, w: 40, h: 42, shape: "rounded", border: "#ffffff", borderW: 1.4, num: 2, label: "Foto 2 (Kegiatan)" },
+          { id: rid(), key: "foto3", src: "foto3", page: "next", x: 152, y: 35, w: 38, h: 38, shape: "rounded", border: "#ffffff", borderW: 1.4, num: 3, label: "Foto 3 (Tambahan)" }
         ];
 
         const newPhotoEls = [];
@@ -2209,8 +2519,8 @@ async function renderPreview(body, s) {
           targetEl.y = lf.y;
           targetEl.w = lf.w;
           targetEl.h = lf.h;
-          targetEl.shape = lf.shape || "circle";
-          targetEl.border = lf.border || "#8b5cf6";
+          targetEl.shape = lf.shape || "rounded";
+          targetEl.border = lf.border || "#ffffff";
           targetEl.borderW = lf.borderW ?? 1.4;
           targetEl.page = lf.page || "first";
           targetEl.src = lf.src || (idx === 0 ? "foto1" : idx === 1 ? "foto2" : "foto3");
@@ -2219,10 +2529,41 @@ async function renderPreview(body, s) {
           targetEl.label = lf.label || `Foto ${idx + 1}`;
         });
 
+        // Simpan posisi & ukuran nama siswa ke template kelas
+        if (s.layout?.nama) {
+          let nEl = fullTpl.els.find((e) => e.kind === "nama");
+          if (!nEl) {
+            nEl = { id: rid(), kind: "nama", page: "first", font: "Lexend" };
+            fullTpl.els.push(nEl);
+          }
+          Object.assign(nEl, s.layout.nama);
+        }
+
+        // Simpan posisi & ukuran kelas ke template kelas
+        if (s.layout?.kelas) {
+          let kEl = fullTpl.els.find((e) => e.kind === "kelas");
+          if (!kEl) {
+            kEl = { id: rid(), kind: "kelas", page: "first", font: "Lexend" };
+            fullTpl.els.push(kEl);
+          }
+          Object.assign(kEl, s.layout.kelas);
+        }
+
+        // Simpan batas atas paragraf jika disesuaikan
+        if (s.layout?.firstTopMm != null || s.layout?.firstHeightMm != null) {
+          const b1 = fullTpl.els.find((e) => e.kind === "body" && e.page === "first");
+          if (b1) {
+            if (s.layout.firstTopMm != null) b1.y = s.layout.firstTopMm;
+            if (s.layout.firstHeightMm != null) b1.h = s.layout.firstHeightMm;
+          }
+        }
+
         await saveTemplate(fullTpl, {});
         if (s.layout?.frames) delete s.layout.frames;
+        if (s.layout?.nama) delete s.layout.nama;
+        if (s.layout?.kelas) delete s.layout.kelas;
         touch(s);
-        toast("✅ Posisi frame foto berhasil disimpan ke Desain Kelas untuk seluruh siswa!");
+        toast("✅ Posisi foto, nama siswa, dan tata letak berhasil disimpan ke Desain Kelas untuk seluruh siswa!");
         renderPreview(body, s);
       } catch (e) {
         toast("Gagal menyimpan ke desain kelas: " + (e.message || e));
@@ -2233,12 +2574,12 @@ async function renderPreview(body, s) {
   const btnResetFrames = $("#btnResetFrames", body);
   if (btnResetFrames) {
     btnResetFrames.onclick = () => {
-      if (s.layout?.frames) {
-        delete s.layout.frames;
-        touch(s);
-      }
+      if (s.layout?.frames) delete s.layout.frames;
+      if (s.layout?.nama) delete s.layout.nama;
+      if (s.layout?.kelas) delete s.layout.kelas;
+      touch(s);
       renderPreview(body, s);
-      toast("Pengaturan frame foto dikembalikan ke default desain.");
+      toast("Pengaturan frame foto dan nama siswa dikembalikan ke default desain.");
     };
   }
 }

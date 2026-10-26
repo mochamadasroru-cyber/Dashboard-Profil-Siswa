@@ -1576,6 +1576,50 @@ button, input, select, textarea {
   animation: slideDown 0.25s var(--ease);
 }
 
+.pv-preset-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border: 1.5px dashed var(--accent);
+  border-radius: var(--r-sm);
+  margin-top: 12px;
+}
+
+.pv-preset-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 4px;
+}
+
+.pv-preset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--fg-heading);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pv-preset-btn:hover,
+.pv-preset-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
 .pv-frames-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
