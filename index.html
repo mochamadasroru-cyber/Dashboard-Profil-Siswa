@@ -24,7 +24,7 @@
       <button class="btn" id="btnKelas" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan kelas</span></button>
       <button class="btn" id="btnUploadCanva" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Upload Desain Canva</span></button>
       <button class="btn" id="btnTpl" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Koleksi Desain</span></button>
-      <button class="btn" id="btnAllAI" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg><span>Tulis semua dengan AI</span></button>
+      <button class="btn" id="btnAllAI" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg><span>✨ Susun Narasi Semua Siswa</span></button>
       <button class="btn primary" id="btnZip" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Unduh semua (ZIP)</span></button>
     </div>
   </header>
@@ -460,7 +460,7 @@ function getTemplatePhotoFrames(tpl, s) {
   }
   const photoEls = (tpl.els || []).filter((e) => e.kind === "foto");
   if (!photoEls.length) {
-    return [{ id: "def_f1", num: 1, key: "foto1", src: "foto1", label: "Foto 1 (Utama)", page: "first", shape: "circle", x: 146, y: 20, w: 46, h: 46, border: "#8b5cf6", borderW: 1.4 }];
+    return [];
   }
   return photoEls.map((e, idx) => {
     const num = idx + 1;
@@ -487,8 +487,17 @@ const BUILTIN = { id: "builtin", nama: "Bawaan: bintang & heksagon", builtin: tr
 const T = { list: [], imgs: new Map() };
 const TPL_LS = "profil-siswa-tpl-v1";
 
-function getLayoutPresetElements(presetKey = "fotoKiri", photoCount = 2, photoShape = "rounded", photoBorder = "#ffffff") {
-  if (presetKey === "fotoKiri") {
+function getLayoutPresetElements(presetKey = "canvaFull", photoCount = 0, photoShape = "rounded", photoBorder = "#ffffff", bodyTopY = 88) {
+  if (presetKey === "canvaFull" || photoCount === 0) {
+    // Mode Latar Utuh Canva (Sangat Direkomendasikan):
+    // Foto siswa, nama, kelas, dan kop sudah didesain langsung di Canva.
+    // Dashboard HANYA mencetak isi paragraf laporan dengan rapi tanpa menumpuk foto/teks.
+    const topY = bodyTopY || 88;
+    return [
+      { id: rid(), kind: "body", page: "first", x: 18, y: topY, w: 174, h: Math.max(140, 278 - topY) },
+      { id: rid(), kind: "body", page: "next", x: 18, y: 30, w: 174, h: 248 }
+    ];
+  } else if (presetKey === "fotoKiri") {
     // Foto di Kiri (klip / awan), Nama & Kelas di Kanan (kotak Nama Lengkap Canva)
     const els = [
       { id: rid(), kind: "body", page: "first", x: 18, y: 86, w: 174, h: 192 },
@@ -548,8 +557,8 @@ function getLayoutPresetElements(presetKey = "fotoKiri", photoCount = 2, photoSh
   }
 }
 
-function newTemplate(photoCount = 2, photoShape = "rounded", photoBorder = "#ffffff", layoutPreset = "fotoKiri") {
-  const els = getLayoutPresetElements(layoutPreset, photoCount, photoShape, photoBorder);
+function newTemplate(photoCount = 0, photoShape = "rounded", photoBorder = "#ffffff", layoutPreset = "canvaFull", bodyTopY = 88) {
+  const els = getLayoutPresetElements(layoutPreset, photoCount, photoShape, photoBorder, bodyTopY);
   return { id: "t_" + rid(), type: "meta", nama: "Desain baru", createdAt: Date.now(), bg: { first: false, next: false }, body: { ...DEFAULT_BODY }, els };
 }
 const lsTpl = () => { try { return JSON.parse(localStorage.getItem(TPL_LS)) || { list: [], imgs: {} }; } catch (e) { return { list: [], imgs: {} }; } };
@@ -613,12 +622,18 @@ function bodyBox(tpl, page, s) {
   const b = { ...base };
   const ov = s?.layout || {};
   if (page === "first") {
-    if (ov.firstTopMm != null) b.y = ov.firstTopMm;
+    if (ov.firstTopMm != null) {
+      b.y = ov.firstTopMm;
+      if (ov.firstHeightMm == null) b.h = Math.max(120, 278 - b.y);
+    }
     if (ov.firstHeightMm != null) b.h = ov.firstHeightMm;
     if (ov.firstLeftMm != null) b.x = ov.firstLeftMm;
     if (ov.firstWidthMm != null) b.w = ov.firstWidthMm;
   } else {
-    if (ov.nextTopMm != null) b.y = ov.nextTopMm;
+    if (ov.nextTopMm != null) {
+      b.y = ov.nextTopMm;
+      if (ov.nextHeightMm == null) b.h = Math.max(120, 280 - b.y);
+    }
     if (ov.nextHeightMm != null) b.h = ov.nextHeightMm;
     if (ov.nextLeftMm != null) b.x = ov.nextLeftMm;
     if (ov.nextWidthMm != null) b.w = ov.nextWidthMm;
@@ -854,15 +869,210 @@ function fillNames(text, s) {
   const pg = (s.panggilan || (s.nama || "").split(/\s+/)[0] || "").trim();
   return String(text).replaceAll("{{NAMA}}", s.nama || "").replaceAll("{{PANGGILAN}}", pg).replace(/\s+/g, " ").trim();
 }
-async function generateFor(s, signal) {
-  const res = await sample.json(buildPrompt(s), { signal, modelTier: "default" });
-  if (!res || typeof res !== "object") throw { code: "invalid_json", message: "Jawaban AI tidak terbaca" };
+function generateSmartNarrative(s) {
+  const k = S.kelas || {};
+  const inp = s.input || {};
+  const nama = s.nama || "Ananda";
+  const pg = (s.panggilan || nama.split(/\s+/)[0] || "Ananda").trim();
+  const sp = sapaan();
   const final = {};
-  for (const p of PARA_SECTIONS) {
-    const arr = Array.isArray(res[p.id]) ? res[p.id] : (typeof res[p.id] === "string" && res[p.id] ? [res[p.id]] : []);
-    final[p.id] = arr.map((t) => fillNames(t, s)).filter(Boolean);
+
+  // 1. BIDANG AKADEMIK
+  const akLines = [];
+  const mapel = inp.mapel?.trim();
+  const sikap = inp.sikapBelajar?.trim();
+  const pos = inp.positifBelajar?.trim();
+  const ting = inp.tingkatkanBelajar?.trim();
+  const catAk = inp.catatanAkademik?.trim();
+
+  let ak1 = `Dalam bidang akademik, Alhamdulillah ${sp} ${nama} menunjukkan antusiasme dan kesungguhan yang baik dalam mengikuti seluruh proses pembelajaran di kelas.`;
+  if (mapel) {
+    ak1 += ` ${sp} ${pg} memiliki minat dan pemahaman yang sangat menonjol pada mata pelajaran ${mapel}.`;
   }
+  if (sikap) {
+    ak1 += ` Dalam keseharian di kelas, ${sikap.toLowerCase().startsWith("ananda") ? sikap : sp + " " + pg + " " + sikap.toLowerCase()}.`;
+  }
+  if (pos) {
+    ak1 += ` Hal positif yang membanggakan adalah ${pos.toLowerCase().startsWith("ananda") ? pos : sp + " " + pg + " " + pos.toLowerCase()}.`;
+  }
+  akLines.push(ak1.replace(/\s+/g, " ").trim());
+
+  if (ting || catAk) {
+    let ak2 = `Adapun ikhtiar yang perlu terus ditingkatkan bersama adalah `;
+    if (ting) {
+      ak2 += `${ting.toLowerCase().startsWith("ananda") ? ting : sp + " " + pg + " " + ting.toLowerCase()}.`;
+    }
+    if (catAk) {
+      ak2 += ` ${catAk}.`;
+    }
+    ak2 += ` Ke depannya, dengan ketekunan belajar dan bimbingan yang konsisten, insya Allah pemahaman ${sp} ${pg} akan semakin matang dan berprestasi.`;
+    akLines.push(ak2.replace(/\s+/g, " ").trim());
+  } else {
+    akLines.push(`Ke depannya, ${sp} ${pg} diharapkan dapat senantiasa mempertahankan semangat belajarnya agar meraih capaian prestasi yang semakin gemilang.`);
+  }
+  final.akademik = akLines;
+
+  // 2. NON-AKADEMIK & PENGEMBANGAN DIRI
+  const nonLines = [];
+  const skip = new Set(inp.kegiatanSkip || []);
+  const ikut = (k.kegiatan || []).filter((g) => !skip.has(g.id));
+  const ekskul = inp.ekskul?.trim();
+  const kegKhusus = inp.kegiatanKhusus?.trim();
+  const peran = inp.peran?.trim();
+  const catPeng = inp.catatanPengembangan?.trim();
+
+  let non1 = `Dalam bidang non-akademik dan pengembangan diri, ${sp} ${pg} aktif mengikuti rangkaian kegiatan sekolah`;
+  if (ikut.length) {
+    const listKeg = ikut.map((g) => g.tanggal ? `${g.nama} (${g.tanggal})` : g.nama).join(", ");
+    non1 += `, antara lain ${listKeg}.`;
+  } else {
+    non1 += ` dengan penuh antusiasme dan keceriaan bersama rekan-rekannya.`;
+  }
+  if (kegKhusus) {
+    non1 += ` Selain itu, ananda juga menunjukkan partisipasi aktif dalam ${kegKhusus}.`;
+  }
+  nonLines.push(non1.replace(/\s+/g, " ").trim());
+
+  if (ekskul || peran || catPeng) {
+    let non2 = "";
+    if (ekskul) {
+      non2 += `Pada kegiatan ekstrakurikuler, ${sp} ${pg} memilih untuk mengembangkan bakatnya melalui ${ekskul}. `;
+    }
+    if (peran) {
+      non2 += `Dalam kerja sama kelompok, ananda menunjukkan kontribusi nyata dengan ${peran.toLowerCase()}. `;
+    }
+    if (catPeng) {
+      non2 += `${catPeng}. `;
+    }
+    non2 += `Semoga melalui ragam aktivitas ini, rasa percaya diri, kemandirian, dan kecakapan sosial ${sp} ${pg} dapat terus terasah secara optimal.`;
+    nonLines.push(non2.replace(/\s+/g, " ").trim());
+  } else {
+    nonLines.push(`Semoga keaktifan ${sp} ${pg} dalam berbagai kegiatan dapat semakin memperkaya wawasan serta menumbuhkan jiwa kepemimpinan yang berakhlak mulia.`);
+  }
+  final.nonAkademik = nonLines;
+
+  // 3. KEAGAMAAN & PEMBINAAN KARAKTER
+  const kgLines = [];
+  const sholatWajib = inp.sholatWajib?.trim() || "Baik";
+  const dhuha = inp.dhuha?.trim() || "Baik";
+  const tahfiz = inp.tahfiz?.trim() || "Baik";
+  const murojaah = inp.murojaah?.trim() || "Baik";
+  const shaum = inp.shaum?.trim();
+  const peranMuh = inp.peranMuhadhoroh?.trim();
+  const perluBina = inp.perluDibina?.trim();
+  const catKg = inp.catatanKeagamaan?.trim();
+
+  let kg1 = `Pada aspek keagamaan dan pembinaan karakter, Alhamdulillah ${sp} ${pg} senantiasa menunjukkan kesungguhan dalam menjalankan pembiasaan ibadah harian di sekolah. Kedisiplinan ananda dalam melaksanakan sholat fardhu berjamaah terpantau ${sholatWajib.toLowerCase()}, begitu pula dengan keistiqomahan sholat Dhuha yang dinilai ${dhuha.toLowerCase()}.`;
+  kgLines.push(kg1.replace(/\s+/g, " ").trim());
+
+  let kg2 = `Pada program Al-Qur'an, capaian tahfiz dan hafalan ananda dinilai ${tahfiz.toLowerCase()} serta murojaah berlangsung ${murojaah.toLowerCase()}. `;
+  if (shaum && shaum !== "-") {
+    kg2 += `Ananda juga termotivasi mengikuti shaum sunnah (${shaum.toLowerCase()}). `;
+  }
+  if (peranMuh) {
+    kg2 += `Dalam kegiatan Muhadhoroh, ananda berperan aktif sebagai ${peranMuh}. `;
+  }
+  if (perluBina) {
+    kg2 += `Sebagai ikhtiar penyempurnaan, hal yang senantiasa dibina bersama adalah ${perluBina.toLowerCase()}. `;
+  }
+  if (catKg) {
+    kg2 += `${catKg}. `;
+  }
+  kg2 += `Semoga Allah Swt. senantiasa menjaga keistiqomahan ananda dalam beribadah dan menghiasi dirinya dengan keluhuran budi pekerti.`;
+  kgLines.push(kg2.replace(/\s+/g, " ").trim());
+  final.keagamaan = kgLines;
+
+  // 4. PRESTASI & LOMBA (Hanya jika ada)
+  const pres = inp.prestasi?.trim();
+  const lomba = inp.lomba?.trim();
+  const tktLomba = inp.tingkatLomba?.trim();
+  if (pres || lomba) {
+    let pr1 = `Alhamdulillah, ${sp} ${pg} menunjukkan potensi dan daya juang yang membanggakan`;
+    if (lomba) {
+      pr1 += ` dengan turut serta dalam ajang perlombaan ${lomba}${tktLomba ? " tingkat " + tktLomba : ""}.`;
+    }
+    if (pres) {
+      pr1 += ` Ananda berhasil menorehkan prestasi yang gemilang, yaitu ${pres}.`;
+    }
+    pr1 += ` Sekolah menyampaikan apresiasi setinggi-tingginya atas semangat juang dan dedikasi yang ditunjukkan oleh ananda.`;
+    final.prestasi = [pr1.replace(/\s+/g, " ").trim()];
+  } else {
+    final.prestasi = [];
+  }
+
+  // 5. KEDISIPLINAN & KEHADIRAN
+  const sNum = parseInt(inp.sakit, 10) || 0;
+  const iNum = parseInt(inp.izin, 10) || 0;
+  const aNum = parseInt(inp.alfa, 10) || 0;
+  const terlambat = inp.terlambat?.trim();
+  const disUmum = inp.disiplinUmum?.trim() || "Baik";
+  const catDis = inp.catatanDisiplin?.trim();
+
+  let dis1 = `Dalam aspek kehadiran dan kedisiplinan, `;
+  if (sNum === 0 && iNum === 0 && aNum === 0) {
+    dis1 += `Alhamdulillah ${sp} ${pg} menunjukkan komitmen dan keteladanan yang sangat baik dengan mencatatkan kehadiran penuh (100%) tanpa sakit, izin, maupun alfa sepanjang periode ini.`;
+  } else {
+    const abs = [];
+    if (sNum > 0) abs.push(`tidak hadir karena sakit sebanyak ${sNum} kali`);
+    if (iNum > 0) abs.push(`izin sebanyak ${iNum} kali`);
+    if (aNum > 0) abs.push(`alfa sebanyak ${aNum} kali`);
+    dis1 += `tercatat ${sp} ${pg} ${abs.join(", ")}. `;
+    if (sNum > 0) dis1 += `Kami senantiasa mendoakan agar ananda selalu diberikan kesehatan prima dan kebugaran jasmani. `;
+    if (iNum > 0) dis1 += `Diharapkan ke depannya ananda dapat memprioritaskan kehadiran di sekolah agar pembelajaran berlangsung berkesinambungan. `;
+    if (aNum > 0) dis1 += `Ananda diingatkan agar lebih disiplin dan senantiasa hadir tepat waktu di sekolah. `;
+  }
+  if (terlambat && terlambat.toLowerCase() !== "tidak ada" && terlambat !== "0") {
+    dis1 += ` Catatan keterlambatan ananda tercatat ${terlambat}.`;
+  }
+  if (disUmum) {
+    dis1 += ` Secara umum, tingkat kepatuhan ananda terhadap tata tertib sekolah tergolong ${disUmum.toLowerCase()}.`;
+  }
+  if (catDis) {
+    dis1 += ` ${catDis}.`;
+  }
+  final.kedisiplinan = [dis1.replace(/\s+/g, " ").trim()];
+
+  // 6. KESIMPULAN
+  const kelebihan = inp.kelebihan?.trim();
+  const dikembangkan = inp.dikembangkan?.trim();
+
+  let ks1 = `Secara keseluruhan, Alhamdulillah ${sp} ${nama} telah menunjukkan proses belajar dan pembentukan karakter yang sangat positif selama bulan ${k.periode || "ini"}.`;
+  if (kelebihan) {
+    ks1 += ` Karakter mulia yang sangat menonjol pada diri ananda adalah ${kelebihan.toLowerCase().startsWith("ananda") ? kelebihan : kelebihan.toLowerCase()}.`;
+  } else {
+    ks1 += ` Sikap santun, keramahan, serta kesungguhan ananda dalam berikhtiar menjadi teladan yang baik di lingkungan kelas.`;
+  }
+
+  let ks2 = `Ke depannya, ${sp} ${pg} diharapkan dapat terus mengasah potensinya, `;
+  if (dikembangkan) {
+    ks2 += `khususnya dalam ${dikembangkan.toLowerCase()}. `;
+  } else {
+    ks2 += `baik dalam pendalaman materi akademik maupun penguatan kemandirian diri. `;
+  }
+  ks2 += `Dengan sinergi dan doa tulus yang senantiasa terjalin antara pihak sekolah dan Ayah/Bunda di rumah, insya Allah ananda akan tumbuh menjadi pribadi yang berakhlak mulia, cerdas, dan bermanfaat bagi sesama.`;
+
+  final.kesimpulan = [ks1.replace(/\s+/g, " ").trim(), ks2.replace(/\s+/g, " ").trim()];
+
   return final;
+}
+
+async function generateFor(s, signal) {
+  if (sample && typeof sample.json === "function") {
+    try {
+      const res = await sample.json(buildPrompt(s), { signal, modelTier: "default" });
+      if (res && typeof res === "object") {
+        const final = {};
+        for (const p of PARA_SECTIONS) {
+          const arr = Array.isArray(res[p.id]) ? res[p.id] : (typeof res[p.id] === "string" && res[p.id] ? [res[p.id]] : []);
+          final[p.id] = arr.map((t) => fillNames(t, s)).filter(Boolean);
+        }
+        return final;
+      }
+    } catch (e) {
+      console.warn("AI online tidak aktif, beralih ke Smart Narrative Engine bawaan:", e);
+    }
+  }
+  return generateSmartNarrative(s);
 }
 function warningsFor(s) {
   const w = [], f = s.final || {}, inp = s.input || {};
@@ -924,57 +1134,79 @@ async function openUploadCanvaModal() {
         <div class="canva-thumbs" id="canvaThumbs"></div>
       </div>
 
-      <div id="canvaFrameConfig" style="margin-top:16px;padding:14px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--r-sm)">
-        <div style="font-weight:700;font-size:13.5px;color:var(--fg-heading);margin-bottom:4px">🖼️ Pengaturan Frame Foto Desain</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Tentukan berapa foto yang ada pada desain Canva bulan ini (maksimal 3 frame):</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-          <label class="radio-card"><input type="radio" name="canvaPhotoCount" value="1"> <span><b>1 Frame</b><br><small style="color:var(--muted)">1 Foto Utama</small></span></label>
-          <label class="radio-card active"><input type="radio" name="canvaPhotoCount" value="2" checked> <span><b>2 Frame</b><br><small style="color:var(--muted)">2 Foto Siswa</small></span></label>
-          <label class="radio-card"><input type="radio" name="canvaPhotoCount" value="3"> <span><b>3 Frame</b><br><small style="color:var(--muted)">Maksimal 3 Foto</small></span></label>
-        </div>
+      <div id="canvaModeConfig" style="margin-top:16px;padding:14px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--r-sm)">
+        <div style="font-weight:700;font-size:13.5px;color:var(--fg-heading);margin-bottom:6px">🎯 Mode Penggunaan Desain Canva</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Pilih bagaimana lembar desain Canva akan dipadukan dengan laporan siswa:</div>
 
-        <div style="font-weight:700;font-size:13px;color:var(--fg-heading);margin-bottom:6px">📐 Preset Posisi Foto & Nama (Sesuai Desain Canva Anda)</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:8px;margin-bottom:14px">
-          <label class="radio-card active" style="flex:1">
-            <input type="radio" name="canvaLayoutPreset" value="fotoKiri" checked>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+          <!-- Opsi 1 (Direkomendasikan): Mode Latar Murni Canva -->
+          <label class="radio-card active" id="cardModeClean" style="align-items:flex-start;padding:12px;cursor:pointer">
+            <input type="radio" name="canvaUsageMode" value="clean" checked>
             <span>
-              <b>👈 Foto di Kiri, Nama di Kanan</b><br>
-              <small style="color:var(--muted)">Foto di klip kiri, kotak nama siswa di kanan atas</small>
+              <b style="color:var(--accent);font-size:13.5px">✨ Mode Latar Murni Canva (Rekomendasi Utama & Praktis)</b><br>
+              <span style="font-size:12px;color:var(--fg);display:block;margin-top:2px;line-height:1.4">
+                Foto siswa, nama, keterangan bulan, dan kelas <b>diedit langsung di Canva</b>. Dashboard fokus <b>100% menyusun narasi kalimat dan merapikan letak paragraf laporan</b> di bawah header Canva tanpa resiko salah letak frame.
+              </span>
             </span>
           </label>
-          <label class="radio-card" style="flex:1">
-            <input type="radio" name="canvaLayoutPreset" value="fotoKanan">
+
+          <!-- Opsi 2: Mode Tempel Frame Foto Otomatis (Opsional) -->
+          <label class="radio-card" id="cardModeOverlay" style="align-items:flex-start;padding:12px;cursor:pointer">
+            <input type="radio" name="canvaUsageMode" value="overlay">
             <span>
-              <b>👉 Foto di Kanan, Nama di Kiri</b><br>
-              <small style="color:var(--muted)">Nama di kiri atas, foto siswa di kanan atas</small>
-            </span>
-          </label>
-          <label class="radio-card" style="flex:1">
-            <input type="radio" name="canvaLayoutPreset" value="fotoAtas">
-            <span>
-              <b>⬆️ Foto Berjajar di Atas</b><br>
-              <small style="color:var(--muted)">Foto berjejer di atas, nama siswa di bawah foto</small>
+              <b style="font-size:13.5px">🖼️ Mode Tempel Frame Foto Otomatis (Opsional)</b><br>
+              <span style="font-size:12px;color:var(--muted);display:block;margin-top:2px;line-height:1.4">
+                Desain Canva sebagai latar kosongan. Dashboard yang akan menempelkan 1-3 kotak foto siswa & teks nama secara otomatis di atasnya.
+              </span>
             </span>
           </label>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="f">
-            <label for="canvaPhotoShape">Bentuk Frame Foto</label>
-            <select id="canvaPhotoShape">
-              <option value="rounded" selected>Kotak Membulat (Rounded)</option>
-              <option value="circle">Lingkaran (Bulat)</option>
-              <option value="rect">Kotak Persegi</option>
-              <option value="hexagon">Heksagon (Segienam)</option>
-            </select>
+        <!-- Panel khusus Clean Mode: Pengaturan Batas Mulai Paragraf -->
+        <div id="panelCleanConfig" style="padding:12px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--line)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label for="canvaBodyTopOffset" style="font-weight:700;font-size:12.5px;color:var(--fg)">Batas Mulai Paragraf di Bawah Header Canva (Offset Atas Y):</label>
+            <span class="badge" id="v_canvaBodyTop" style="font-size:12px">88 mm</span>
           </div>
-          <div class="f">
-            <label for="canvaPhotoBorder">Warna Garis Tepi Frame</label>
-            <input type="color" id="canvaPhotoBorder" value="#ffffff">
+          <div style="display:flex;gap:10px;align-items:center">
+            <button type="button" class="btn sm ghost" id="btnStepDownTop">-2</button>
+            <input type="range" id="canvaBodyTopOffset" min="45" max="140" step="1" value="88" style="flex:1">
+            <button type="button" class="btn sm ghost" id="btnStepUpTop">+2</button>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:6px">
+            💡 <i>Sesuaikan dengan tinggi kop/frame di lembar Canva Anda. Teks paragraf laporan akan otomatis mulai dicetak rapi tepat di bawah batas ini.</i>
           </div>
         </div>
-        <div style="margin-top:8px;font-size:11.5px;color:var(--muted);line-height:1.4">
-          💡 <i>Letak posisi koordinat (X & Y mm), nama siswa, dan tinggi paragraf dapat disesuaikan lewat tombol <b>"Atur Posisi Foto & Nama"</b> di tab Pratinjau agar pas 100% dengan ilustrasi Canva.</i>
+
+        <!-- Panel Overlay Config (Tersembunyi secara default, hanya jika Opsi 2 dipilih) -->
+        <div id="panelOverlayConfig" style="display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)">
+          <div style="font-weight:700;font-size:13px;color:var(--fg-heading);margin-bottom:4px">Jumlah Frame Foto:</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+            <label class="radio-card"><input type="radio" name="canvaPhotoCount" value="1"> <span><b>1 Frame</b><br><small style="color:var(--muted)">1 Foto Utama</small></span></label>
+            <label class="radio-card active"><input type="radio" name="canvaPhotoCount" value="2" checked> <span><b>2 Frame</b><br><small style="color:var(--muted)">2 Foto Siswa</small></span></label>
+            <label class="radio-card"><input type="radio" name="canvaPhotoCount" value="3"> <span><b>3 Frame</b><br><small style="color:var(--muted)">Maks 3 Foto</small></span></label>
+          </div>
+          <div style="font-weight:700;font-size:13px;color:var(--fg-heading);margin-bottom:6px">Preset Posisi Foto & Nama:</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));gap:8px;margin-bottom:12px">
+            <label class="radio-card active"><input type="radio" name="canvaLayoutPreset" value="fotoKiri" checked> <span><b>👈 Foto di Kiri, Nama di Kanan</b></span></label>
+            <label class="radio-card"><input type="radio" name="canvaLayoutPreset" value="fotoKanan"> <span><b>👉 Foto di Kanan, Nama di Kiri</b></span></label>
+            <label class="radio-card"><input type="radio" name="canvaLayoutPreset" value="fotoAtas"> <span><b>⬆️ Foto Berjajar di Atas</b></span></label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="f">
+              <label for="canvaPhotoShape">Bentuk Frame Foto</label>
+              <select id="canvaPhotoShape">
+                <option value="rounded" selected>Kotak Membulat</option>
+                <option value="circle">Lingkaran</option>
+                <option value="rect">Kotak Persegi</option>
+                <option value="hexagon">Heksagon</option>
+              </select>
+            </div>
+            <div class="f">
+              <label for="canvaPhotoBorder">Warna Garis Tepi Frame</label>
+              <input type="color" id="canvaPhotoBorder" value="#ffffff">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -999,6 +1231,33 @@ async function openUploadCanvaModal() {
   const close = () => el.remove();
   $("#upClose", el).onclick = close;
   $("#upCancel", el).onclick = close;
+
+  const cleanPanel = $("#panelCleanConfig", el);
+  const overlayPanel = $("#panelOverlayConfig", el);
+  const topSlider = $("#canvaBodyTopOffset", el);
+  const topBadge = $("#v_canvaBodyTop", el);
+
+  if (topSlider && topBadge) {
+    topSlider.oninput = () => { topBadge.textContent = topSlider.value + " mm"; };
+    $("#btnStepDownTop", el).onclick = () => {
+      topSlider.value = Math.max(45, parseInt(topSlider.value, 10) - 2);
+      topBadge.textContent = topSlider.value + " mm";
+    };
+    $("#btnStepUpTop", el).onclick = () => {
+      topSlider.value = Math.min(140, parseInt(topSlider.value, 10) + 2);
+      topBadge.textContent = topSlider.value + " mm";
+    };
+  }
+
+  el.querySelectorAll("input[name='canvaUsageMode']").forEach((r) => {
+    r.onchange = () => {
+      const isClean = r.value === "clean";
+      $("#cardModeClean", el)?.classList.toggle("active", isClean);
+      $("#cardModeOverlay", el)?.classList.toggle("active", !isClean);
+      if (cleanPanel) cleanPanel.style.display = isClean ? "block" : "none";
+      if (overlayPanel) overlayPanel.style.display = isClean ? "none" : "block";
+    };
+  });
 
   el.querySelectorAll("input[name='canvaPhotoCount'], input[name='canvaLayoutPreset']").forEach((r) => {
     r.onchange = () => {
@@ -1067,11 +1326,21 @@ async function openUploadCanvaModal() {
     submitBtn.textContent = "Menyimpan…";
 
     try {
-      const pCount = parseInt($("input[name='canvaPhotoCount']:checked", el)?.value || "2", 10);
-      const pPreset = $("input[name='canvaLayoutPreset']:checked", el)?.value || "fotoKiri";
-      const pShape = $("#canvaPhotoShape", el)?.value || "rounded";
-      const pBorder = $("#canvaPhotoBorder", el)?.value || "#ffffff";
-      const tpl = newTemplate(pCount, pShape, pBorder, pPreset);
+      const usageMode = $("input[name='canvaUsageMode']:checked", el)?.value || "clean";
+      let tpl;
+      let descInfo = "";
+      if (usageMode === "clean") {
+        const topY = parseInt($("#canvaBodyTopOffset", el)?.value || "88", 10);
+        tpl = newTemplate(0, "rounded", "#ffffff", "canvaFull", topY);
+        descInfo = "Mode Latar Murni Canva";
+      } else {
+        const pCount = parseInt($("input[name='canvaPhotoCount']:checked", el)?.value || "2", 10);
+        const pPreset = $("input[name='canvaLayoutPreset']:checked", el)?.value || "fotoKiri";
+        const pShape = $("#canvaPhotoShape", el)?.value || "rounded";
+        const pBorder = $("#canvaPhotoBorder", el)?.value || "#ffffff";
+        tpl = newTemplate(pCount, pShape, pBorder, pPreset);
+        descInfo = `${pCount} frame foto`;
+      }
       tpl.nama = $("#canvaName", el).value.trim() || defName;
       const imgs = { first: extracted.first, next: extracted.next || extracted.first };
       const saved = await saveTemplate(tpl, imgs);
@@ -1083,7 +1352,7 @@ async function openUploadCanvaModal() {
       }
       close();
       render();
-      toast(`🎉 Desain "${saved.nama}" berhasil disimpan (${pCount} frame foto)${setActive ? " dan dipasang!" : "."}`);
+      toast(`🎉 Desain "${saved.nama}" berhasil disimpan (${descInfo})${setActive ? " dan dipasang!" : "."}`);
       if (S.sel) {
         S.tab = "pratinjau";
         renderWork();
@@ -1392,8 +1661,8 @@ function render() {
   $("#btnUploadCanva").hidden = !hasKelas;
   $("#btnTpl").hidden = !hasKelas;
   $("#btnAllAI").hidden = !hasKelas || !S.students.length;
-  $("#btnAllAI").disabled = !sample;
-  $("#btnAllAI").title = sample ? "" : "AI tidak tersedia di tampilan ini";
+  $("#btnAllAI").disabled = false;
+  $("#btnAllAI").title = "Susun narasi laporan untuk seluruh siswa";
   $("#btnZip").hidden = !hasKelas || !S.students.length;
   $("#sub").textContent = hasKelas ? `${S.kelas.namaKelas || "Kelas"} · ${S.kelas.periode ? S.kelas.periode + " " + (S.kelas.tahun || "") : "periode belum diisi"} · ${activeTplMeta().nama}` : "Belum ada kelas";
   if (!hasKelas) { main.replaceChildren(h(`<div class="panel empty">
@@ -1478,7 +1747,7 @@ function renderWork() {
       <h2 id="wName">${esc(s.nama || "Siswa baru")}</h2><span class="chip ${st}" id="stChip">${STATUS_LABEL[st]}</span>
       ${s.contoh ? `<span class="chip kosong">Contoh</span>` : ""}
       <span class="grow"></span>
-      <button class="btn" id="wAI" ${sample ? "" : "disabled title='AI tidak tersedia di tampilan ini'"}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg><span>Tulis dengan AI</span></button>
+      <button class="btn" id="wAI" title="Susun narasi laporan otomatis untuk siswa ini"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg><span>✨ Susun Narasi Laporan</span></button>
       <button class="btn primary" id="wPdf"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Unduh PDF</span></button>
     </div>
     <div class="tabs" role="tablist">
@@ -1524,6 +1793,21 @@ function renderForm(body, s) {
       <div class="f"><label for="f_panggilan">Nama panggilan</label><input type="text" id="f_panggilan" value="${esc(s.panggilan)}" placeholder="mis. Naura"><span class="hint">Dipakai di paragraf, mis. "ananda Naura".</span></div>
     </div></div>
 
+    ${frames.length === 0 ? `
+    <div class="sec" style="background:var(--accent-soft);border:1.5px solid var(--accent);border-radius:var(--r);padding:14px 16px">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="font-size:26px">🎨</span>
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+            <h4 style="margin:0;font-size:14px;color:var(--accent);font-weight:700">Mode Latar Murni Canva Aktif</h4>
+            <span class="chip siap" style="font-size:11px">Foto & Nama Diedit di Canva</span>
+          </div>
+          <p style="margin:4px 0 0;font-size:12.5px;color:var(--fg);line-height:1.5">
+            Foto siswa, nama, keterangan bulan, dan kelas <b>ditampilkan langsung dari lembar desain Canva Anda</b>. Anda tidak perlu repot mengunggah foto satu-per-satu ataupun mengatur koordinat frame foto di sini! Cukup lengkapi data observasi di bawah, lalu klik <b>✨ Susun Narasi Laporan Siswa</b>.
+          </p>
+        </div>
+      </div>
+    </div>` : `
     <div class="sec">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
         <div>
@@ -1561,7 +1845,7 @@ function renderForm(body, s) {
           </div>`;
         }).join("")}
       </div>
-    </div>
+    </div>`}
 
     ${SECTIONS.map((sec) => `<div class="sec"><h3>${esc(sec.title)}</h3><div class="fields">${
       sec.id === "keagamaan"
@@ -1571,7 +1855,7 @@ function renderForm(body, s) {
         : sec.fields.map((f) => fieldHtml(f, inp)).join("")}</div></div>`).join("")}
     <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
       <button class="btn danger" id="delStu">Hapus siswa ini</button>
-      <button class="btn primary" id="toPara" ${sample ? "" : "disabled"}>Tulis paragraf dengan AI</button>
+      <button class="btn primary" id="toPara">✨ Susun Narasi Laporan Siswa</button>
     </div></div>`));
   $("#f_nama").oninput = (e) => { s.nama = e.target.value; $("#wName").textContent = s.nama || "Siswa baru"; touch(s); };
   $("#f_panggilan").oninput = (e) => { s.panggilan = e.target.value; touch(s); };
@@ -1634,9 +1918,29 @@ function renderParas(body, s) {
   const warns = warningsFor(s);
   const total = PARA_SECTIONS.reduce((n, p) => n + (f[p.id] || []).length, 0);
   body.replaceChildren(h(`<div>
-    ${!total ? `<div class="notice info"><div>Paragraf belum ada. Klik <strong>Tulis paragraf dengan AI</strong>, atau ketik sendiri dengan tombol "+ Paragraf" di tiap bagian. Tandai istilah asing dengan *bintang* agar tercetak miring.</div></div>` : ""}
+    <div class="para-hero-bar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;background:var(--surface-2);border:1.5px solid var(--accent);border-radius:var(--r);padding:14px 16px;margin-bottom:16px">
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--fg-heading);display:flex;align-items:center;gap:6px">
+          <span>✍️ Narasi Kalimat Laporan Perkembangan Siswa</span>
+          <span class="chip" style="font-size:11px;background:var(--accent-soft);color:var(--accent);font-weight:700">Bahasa Indonesia Baku & Santun</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">
+          ${total ? `<b>${total} paragraf</b> tersusun · Mengikuti kaidah bahasa baku, santun, dan pedagogis. Anda dapat langsung mengedit kalimat di bawah.` : `Belum ada narasi tersusun. Klik tombol di kanan untuk menyusun narasi kalimat laporan secara otomatis dan rapi.`}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" id="btnGenNarrativeNow" type="button" title="Susun narasi kalimat otomatis menggunakan standar bahasa baku, santun, dan pedagogis">
+          ✨ Susun / Segarkan Narasi Laporan
+        </button>
+        <button class="btn" id="btnGoToPreviewNow" type="button" title="Lihat pratinjau di lembar cetak A4 Canva dan rapikan tata letak">
+          📐 Rapikan Tata Letak di Pratinjau →
+        </button>
+      </div>
+    </div>
+
+    ${!total ? `<div class="notice info"><div>Paragraf belum ada. Klik <strong>✨ Susun / Segarkan Narasi Laporan</strong> di atas, atau ketik sendiri dengan tombol "+ Paragraf" di tiap bagian. Tandai istilah asing dengan *bintang* agar tercetak miring.</div></div>` : ""}
     ${warns.length ? `<div class="notice warn"><div><strong>Periksa sebelum cetak</strong><ul>${warns.map((w) => `<li>${esc(w)}</li>`).join("")}</ul></div></div>` : ""}
-    ${total ? `<div class="notice info"><div>Bandingkan setiap paragraf dengan data guru di kolom kiri. AI bisa keliru menambah detail yang tidak ada di data.</div></div>` : ""}
+    ${total ? `<div class="notice info"><div>Bandingkan setiap paragraf dengan data guru di kolom kiri. Anda dapat menyempurnakan redaksi kata pada kotak teks di bawah.</div></div>` : ""}
     ${PARA_SECTIONS.map((p) => `<div class="para-sec" data-sec="${p.id}">
       <div><h3>${esc(p.title)}</h3><div class="src">${srcHtml(s, p.id)}</div></div>
       <div><div class="para-list">${(f[p.id] || []).map((t, i) => `<div class="para"><textarea data-i="${i}" aria-label="${esc(p.title)} paragraf ${i + 1}">${esc(t)}</textarea>
@@ -1644,6 +1948,12 @@ function renderParas(body, s) {
         <div style="margin-top:8px"><button class="btn sm" data-add>+ Paragraf</button></div></div>
     </div>`).join("")}
   </div>`));
+
+  const btnGen = $("#btnGenNarrativeNow", body);
+  if (btnGen) btnGen.onclick = () => runAI([s]);
+  const btnPrev = $("#btnGoToPreviewNow", body);
+  if (btnPrev) btnPrev.onclick = () => { S.tab = "pratinjau"; pvShowLayout = true; renderWork(); };
+
   const autosize = (ta) => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + 2 + "px"; };
   body.querySelectorAll(".para-sec").forEach((secEl) => {
     const id = secEl.dataset.sec;
@@ -1719,6 +2029,7 @@ async function renderPreview(body, s) {
   const curBox1 = bodyBox(tpl, "first", s);
   const curBox2 = bodyBox(tpl, "next", s);
   const curFrames = getTemplatePhotoFrames(tpl, s);
+  const isCleanCanva = curFrames.length === 0;
   const curNamaEl = { ...(tpl.els?.find((e) => e.kind === "nama") || { x: 118, y: 34, sizePt: 15, align: "center", hidden: false }), ...(s.layout?.nama || {}) };
   const curKelasEl = { ...(tpl.els?.find((e) => e.kind === "kelas") || { x: 118, y: 50, sizePt: 11, align: "center", hidden: false }), ...(s.layout?.kelas || {}) };
 
@@ -1729,22 +2040,45 @@ async function renderPreview(body, s) {
         <span class="pv-status-chip" id="pvStatusChip"></span>
       </div>
       <div class="pv-actions">
-        <button class="btn sm ${pvShowFrames ? "active" : ""}" id="btnToggleFrames" aria-expanded="${pvShowFrames}" title="Atur posisi koordinat foto, nama siswa, dan preset tata letak agar pas dengan desain Canva">🖼️ Atur Posisi Foto & Nama (${curFrames.length})</button>
-        <button class="btn sm ${pvShowLayout ? "active" : ""}" id="btnToggleLayout" aria-expanded="${pvShowLayout}">📐 Rapikan Paragraf</button>
-        <button class="btn sm" id="btnAutoFit" title="Kecilkan font sedikit secara otomatis agar pas tanpa baris menggantung">⚡ Auto-Fit</button>
+        ${isCleanCanva
+          ? `<button class="btn sm ${pvShowLayout ? "active" : "primary"}" id="btnToggleLayout" aria-expanded="${pvShowLayout}">📐 Atur Batas & Paragraf Teks</button>
+             <button class="btn sm ${pvShowFrames ? "active" : ""}" id="btnToggleFrames" aria-expanded="${pvShowFrames}" title="Informasi desain latar Canva">🎨 Desain Canva</button>`
+          : `<button class="btn sm ${pvShowFrames ? "active" : ""}" id="btnToggleFrames" aria-expanded="${pvShowFrames}" title="Atur posisi koordinat foto, nama siswa, dan preset tata letak agar pas dengan desain Canva">🖼️ Atur Posisi Foto & Nama (${curFrames.length})</button>
+             <button class="btn sm ${pvShowLayout ? "active" : ""}" id="btnToggleLayout" aria-expanded="${pvShowLayout}">📐 Rapikan Paragraf</button>`
+        }
+        <button class="btn sm" id="btnAutoFit" title="Kecilkan font sedikit secara otomatis agar pas tanpa baris menggantung">⚡ Auto-Fit (Pas 2 Hal)</button>
         <button class="btn sm ${pvLiveEdit ? "active" : ""}" id="btnLiveEdit" aria-pressed="${pvLiveEdit}">${pvLiveEdit ? "✓ Selesai Koreksi Teks" : "✏️ Koreksi Teks"}</button>
         <button class="btn sm primary" id="btnPvPdf">Unduh PDF</button>
       </div>
     </div>
 
-    <!-- Drawer: Pengaturan Posisi & Ukuran Frame Foto -->
+    <!-- Drawer: Pengaturan Posisi & Ukuran Frame Foto / Info Desain Canva -->
     <div class="pv-frames-drawer" id="pvFramesDrawer" style="display:${pvShowFrames ? "block" : "none"}">
+      ${isCleanCanva ? `
+      <div class="pv-layout-header">
+        <div>
+          <b>🎨 Mode Latar Murni Canva Aktif</b>
+          <p class="hint" style="margin:2px 0 0">Foto siswa, nama, keterangan bulan, dan kelas <b>tampil langsung dari lembar Canva</b>. Tidak ada frame foto overlay bawaan yang menumpuk di atas lembar Anda.</p>
+        </div>
+        <div class="pv-layout-acts">
+          <button class="btn sm primary" id="btnOpenLayoutFromClean">📐 Atur Batas & Paragraf Teks</button>
+        </div>
+      </div>
+      <div style="padding:16px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--line);font-size:13px;line-height:1.6">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:6px">💡 Alur Kerja Sangat Praktis (Rekomendasi Utama):</div>
+        <ol style="margin:0;padding-left:20px;color:var(--fg)">
+          <li>Edit foto siswa, nama, bulan, dan kelas langsung di Canva secara visual (bebas berkreasi dan tanpa ribet koordinat).</li>
+          <li>Unduh hasil Canva sebagai PDF atau gambar, lalu unggah lewat menu <b>Upload Desain Canva</b>.</li>
+          <li>Di dashboard ini, klik <b>"✨ Susun Narasi Laporan"</b> lalu sesuaikan <b>Batas Mulai Paragraf (Offset Atas Y)</b> agar teks mulai pas di bawah header Canva lewat tombol <b>"📐 Atur Batas & Paragraf Teks"</b>.</li>
+        </ol>
+      </div>` : `
       <div class="pv-layout-header">
         <div>
           <b>🖼️ Pengaturan Posisi Foto & Nama Siswa (${curFrames.length} Frame Foto)</b>
           <p class="hint" style="margin:2px 0 0">Pilih preset cepat di bawah atau geser koordinat (X & Y mm) agar bingkai foto dan nama siswa <b>pas 100% di atas desain Canva</b>.</p>
         </div>
         <div class="pv-layout-acts">
+          <button class="btn sm" id="btnConvertToCleanCanva" style="background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700" title="Hapus overlay foto & nama agar foto & nama tampil murni dari Canva">🎨 Beralih ke Mode Latar Canva Murni</button>
           <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600">
             <span>Jumlah:</span>
             <div class="seg" role="group">
@@ -1938,36 +2272,58 @@ async function renderPreview(body, s) {
             </div>
           </div>
         </div>
-      </div>
+      </div>`}
     </div>
 
+    <!-- Drawer: Pengaturan Tata Letak Paragraf -->
     <div class="pv-layout-drawer" id="pvLayoutDrawer" style="display:${pvShowLayout ? "block" : "none"}">
       <div class="pv-layout-header">
         <div>
-          <b>📐 Pengaturan Tata Letak Paragraf</b>
-          <p class="hint" style="margin:2px 0 0">Sesuaikan ukuran font, spasi baris, dan margin area teks agar isi paragraf pas dan serasi dengan desain Canva.</p>
+          <b>📐 Pengaturan Tata Letak Paragraf Laporan</b>
+          <p class="hint" style="margin:2px 0 0">Sesuaikan batas mulai paragraf di bawah header Canva, ukuran font, dan jarak baris agar susunan kalimat pas dan rapi.</p>
         </div>
         <div class="pv-layout-acts">
-          <button class="btn sm" id="btnSaveToClassTpl" title="Simpan pengaturan ini ke desain aktif kelas agar semua siswa memiliki tata letak seragam">💾 Simpan ke Desain Kelas</button>
+          <button class="btn sm primary" id="btnSaveToClassTpl" title="Simpan pengaturan ini ke desain aktif kelas agar semua siswa memiliki tata letak seragam">💾 Simpan ke Desain Kelas</button>
           <button class="btn sm" id="btnSaveToStudent" title="Simpan khusus siswa ini saja">👤 Simpan untuk Siswa Ini</button>
           <button class="btn sm ghost danger" id="btnResetLayout">↺ Reset Default</button>
         </div>
       </div>
       <div class="pv-layout-grid">
         <div class="pv-ctrl-card">
-          <h4>Tipografi & Jarak</h4>
+          <h4>📍 Batas Mulai Paragraf Halaman 1</h4>
           <div class="pv-ctrl">
-            <div class="pv-ctrl-head"><label for="rg_fs">Ukuran Huruf</label><span class="badge" id="v_fs">${curBody.sizePt} pt</span></div>
+            <div class="pv-ctrl-head"><label for="rg_top1">Batas Atas (Offset Y di bawah Header)</label><span class="badge" id="v_top1">${curBox1.y} mm</span></div>
+            <div class="pv-ctrl-row">
+              <button class="btn sm ghost" data-box="firstTopMm" data-val="-2">-2</button>
+              <button class="btn sm ghost" data-box="firstTopMm" data-val="-0.5">-</button>
+              <input type="range" min="40" max="145" step="0.5" id="rg_top1" value="${curBox1.y}">
+              <button class="btn sm ghost" data-box="firstTopMm" data-val="0.5">+</button>
+              <button class="btn sm ghost" data-box="firstTopMm" data-val="2">+2</button>
+            </div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:2px">Geser naik/turun agar paragraf mulai tepat di bawah foto/header Canva.</div>
+          </div>
+          <div class="pv-ctrl">
+            <div class="pv-ctrl-head"><label for="rg_h1">Tinggi Maksimal Area Paragraf</label><span class="badge" id="v_h1">${curBox1.h} mm</span></div>
+            <div class="pv-ctrl-row">
+              <input type="range" min="120" max="240" step="2" id="rg_h1" value="${curBox1.h}">
+            </div>
+          </div>
+        </div>
+
+        <div class="pv-ctrl-card">
+          <h4>✍️ Tipografi & Kerapihan Teks</h4>
+          <div class="pv-ctrl">
+            <div class="pv-ctrl-head"><label for="rg_fs">Ukuran Huruf (Font Size)</label><span class="badge" id="v_fs">${curBody.sizePt} pt</span></div>
             <div class="pv-ctrl-row">
               <button class="btn sm ghost" data-step="sizePt" data-val="-0.2">-</button>
-              <input type="range" min="7.5" max="12.0" step="0.1" id="rg_fs" value="${curBody.sizePt}">
+              <input type="range" min="7.5" max="12.5" step="0.1" id="rg_fs" value="${curBody.sizePt}">
               <button class="btn sm ghost" data-step="sizePt" data-val="0.2">+</button>
             </div>
           </div>
           <div class="pv-ctrl">
-            <div class="pv-ctrl-head"><label for="rg_lh">Spasi Baris</label><span class="badge" id="v_lh">${curBody.lineHeight}</span></div>
+            <div class="pv-ctrl-head"><label for="rg_lh">Spasi Baris (Line Height)</label><span class="badge" id="v_lh">${curBody.lineHeight}</span></div>
             <div class="pv-ctrl-row">
-              <input type="range" min="1.20" max="1.90" step="0.02" id="rg_lh" value="${curBody.lineHeight}">
+              <input type="range" min="1.20" max="1.95" step="0.02" id="rg_lh" value="${curBody.lineHeight}">
             </div>
           </div>
           <div class="pv-ctrl">
@@ -1985,35 +2341,19 @@ async function renderPreview(body, s) {
         </div>
 
         <div class="pv-ctrl-card">
-          <h4>Area Paragraf Halaman 1</h4>
-          <div class="pv-ctrl">
-            <div class="pv-ctrl-head"><label for="rg_top1">Batas Atas (Offset Y)</label><span class="badge" id="v_top1">${curBox1.y} mm</span></div>
-            <div class="pv-ctrl-row">
-              <button class="btn sm ghost" data-box="firstTopMm" data-val="-2">-</button>
-              <input type="range" min="40" max="130" step="1" id="rg_top1" value="${curBox1.y}">
-              <button class="btn sm ghost" data-box="firstTopMm" data-val="2">+</button>
-            </div>
-          </div>
-          <div class="pv-ctrl">
-            <div class="pv-ctrl-head"><label for="rg_h1">Tinggi Area Teks</label><span class="badge" id="v_h1">${curBox1.h} mm</span></div>
-            <div class="pv-ctrl-row">
-              <input type="range" min="130" max="240" step="2" id="rg_h1" value="${curBox1.h}">
-            </div>
-          </div>
-        </div>
-
-        <div class="pv-ctrl-card">
-          <h4>Area Paragraf Halaman Lanjutan</h4>
+          <h4>📄 Area Paragraf Halaman 2 (Lanjutan)</h4>
           <div class="pv-ctrl">
             <div class="pv-ctrl-head"><label for="rg_top2">Batas Atas (Offset Y)</label><span class="badge" id="v_top2">${curBox2.y} mm</span></div>
             <div class="pv-ctrl-row">
-              <button class="btn sm ghost" data-box="nextTopMm" data-val="-2">-</button>
-              <input type="range" min="15" max="80" step="1" id="rg_top2" value="${curBox2.y}">
-              <button class="btn sm ghost" data-box="nextTopMm" data-val="2">+</button>
+              <button class="btn sm ghost" data-box="nextTopMm" data-val="-2">-2</button>
+              <button class="btn sm ghost" data-box="nextTopMm" data-val="-0.5">-</button>
+              <input type="range" min="15" max="90" step="0.5" id="rg_top2" value="${curBox2.y}">
+              <button class="btn sm ghost" data-box="nextTopMm" data-val="0.5">+</button>
+              <button class="btn sm ghost" data-box="nextTopMm" data-val="2">+2</button>
             </div>
           </div>
           <div class="pv-ctrl">
-            <div class="pv-ctrl-head"><label for="rg_h2">Tinggi Area Teks</label><span class="badge" id="v_h2">${curBox2.h} mm</span></div>
+            <div class="pv-ctrl-head"><label for="rg_h2">Tinggi Maksimal Area Paragraf</label><span class="badge" id="v_h2">${curBox2.h} mm</span></div>
             <div class="pv-ctrl-row">
               <input type="range" min="170" max="270" step="2" id="rg_h2" value="${curBox2.h}">
             </div>
@@ -2141,6 +2481,36 @@ async function renderPreview(body, s) {
     $("#pvLayoutDrawer", body).style.display = pvShowLayout ? "block" : "none";
     $("#btnToggleLayout", body).classList.toggle("active", pvShowLayout);
     $("#btnToggleLayout", body).setAttribute("aria-expanded", pvShowLayout);
+  };
+
+  const btnOpenCleanLayout = $("#btnOpenLayoutFromClean", body);
+  if (btnOpenCleanLayout) {
+    btnOpenCleanLayout.onclick = () => {
+      pvShowLayout = true;
+      pvShowFrames = false;
+      $("#pvLayoutDrawer", body).style.display = "block";
+      $("#pvFramesDrawer", body).style.display = "none";
+      $("#btnToggleLayout", body)?.classList.add("active");
+      $("#btnToggleFrames", body)?.classList.remove("active");
+    };
+  }
+
+  const btnConvertClean = $("#btnConvertToCleanCanva", body);
+  if (btnConvertClean) {
+    btnConvertClean.onclick = async () => {
+      const activeMeta = activeTplMeta();
+      if (activeMeta.builtin) {
+        toast("Desain bawaan tidak dapat diubah. Silakan unggah desain baru dari Canva.");
+        return;
+      }
+      const fullTpl = await resolveTpl(activeMeta);
+      fullTpl.els = (fullTpl.els || []).filter((e) => e.kind === "body");
+      await saveTemplate(fullTpl, {});
+      delete s.layout;
+      touch(s);
+      toast("✨ Berhasil beralih ke Mode Latar Canva Murni! Foto & nama kini tampil langsung dari Canva tanpa overlay.");
+      renderPreview(body, s);
+    };
   };
 
   $("#btnLiveEdit", body).onclick = () => {
@@ -2595,24 +2965,23 @@ function progressDialog(title) {
   return { signal: ctl.signal, set(t, frac) { $("#pgText", el).textContent = t; if (frac != null) $("#pgBar", el).style.width = Math.round(frac * 100) + "%"; }, close() { el.remove(); } };
 }
 async function runAI(list) {
-  if (!sample) return toast("AI tidak tersedia di tampilan ini.");
   const todo = list.filter((s) => statusOf(s) !== "kosong");
-  if (!todo.length) return toast("Isi data siswa dulu sebelum menulis paragraf.");
-  const dlg = progressDialog(todo.length > 1 ? "Menulis paragraf seluruh kelas" : "Menulis paragraf");
+  if (!todo.length) return toast("Isi data siswa dulu sebelum menyusun narasi paragraf.");
+  const dlg = progressDialog(todo.length > 1 ? "Menyusun narasi laporan seluruh kelas" : "Menyusun narasi laporan");
   let done = 0;
   try {
     for (const s of todo) {
       if (dlg.signal.aborted) break;
-      dlg.set(`${s.nama || "Siswa"}: AI sedang menulis… biasanya 20–60 detik.`, done / todo.length);
+      dlg.set(`${s.nama || "Siswa"}: Menyusun narasi bahasa Indonesia yang santun & baku…`, done / todo.length);
       s.final = await generateFor(s, dlg.signal);
       done++; touch(s);
     }
     dlg.close();
-    toast(done ? `Paragraf selesai untuk ${done} siswa. Periksa dulu sebelum dicetak.` : "Dihentikan.");
+    toast(done ? `✅ Narasi laporan berhasil disusun untuk ${done} siswa!` : "Dihentikan.");
   } catch (e) {
     dlg.close();
-    const m = { cancelled: "Dihentikan.", not_granted: "Izin memakai Claude ditolak. AI tidak bisa dipakai di tampilan ini.", rate_limited: "Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.", invalid_json: "Jawaban AI tidak terbaca. Coba lagi." };
-    toast((done ? `${done} siswa selesai. ` : "") + (m[e?.code] || "AI gagal: " + (e?.message || e?.code || "coba lagi")), 5000);
+    const m = { cancelled: "Dihentikan.", not_granted: "Izin AI ditolak.", rate_limited: "Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.", invalid_json: "Jawaban AI tidak terbaca. Coba lagi." };
+    toast((done ? `${done} siswa selesai. ` : "") + (m[e?.code] || "Gagal menyusun narasi: " + (e?.message || e?.code || "coba lagi")), 5000);
   }
   if (cur() && todo.includes(cur())) S.tab = "paragraf";
   renderList(); renderWork();
