@@ -30,6 +30,57 @@
       <button class="btn primary" id="btnZip" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Unduh semua (ZIP)</span></button>
     </div>
   </header>
+
+  <!-- Dua Ruang Pengelolaan Kelas Terpisah (Judul Besar) -->
+  <nav class="class-nav-bar" id="classNavBar" aria-label="Ruang Pengelolaan Kelas Utama">
+    <div class="class-nav-inner">
+      <button type="button" class="class-card-btn active" id="btnNavIbnu" data-class="ibnu_khaldun_1" aria-current="page">
+        <div class="class-card-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            <path d="M8 7h6"/><path d="M8 11h8"/>
+          </svg>
+        </div>
+        <div class="class-card-body">
+          <div class="class-card-header-line">
+            <span class="class-badge-category">RUANG KELAS 1</span>
+            <span class="class-badge-status" id="badgeIbnuStatus">● RUANG AKTIF</span>
+          </div>
+          <div class="class-card-title">KELAS IBNU KHALDUN 1</div>
+          <div class="class-card-desc">Kelas VII Ibnu Khaldun · Wali: Mochamad Asroru P, S.Pd, G.r</div>
+          <div class="class-card-footer">
+            <span class="class-card-chip" id="chipIbnuCount">1 Siswa</span>
+            <span class="class-card-chip outline" id="chipIbnuTpl">Desain Canva Khusus</span>
+            <span class="class-card-cta">Buka Ruang Kerja ➔</span>
+          </div>
+        </div>
+      </button>
+
+      <button type="button" class="class-card-btn" id="btnNavUmar" data-class="umar_bin_khattab_1">
+        <div class="class-card-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+        </div>
+        <div class="class-card-body">
+          <div class="class-card-header-line">
+            <span class="class-badge-category">RUANG KELAS 2</span>
+            <span class="class-badge-status" id="badgeUmarStatus">● RUANG AKTIF</span>
+          </div>
+          <div class="class-card-title">KELAS UMAR BIN KHATTAB 1</div>
+          <div class="class-card-desc">Kelas IX Umar Bin Khattab · Wali: Syarifatu Zahro, S.Pd</div>
+          <div class="class-card-footer">
+            <span class="class-card-chip" id="chipUmarCount">2 Siswa</span>
+            <span class="class-card-chip outline" id="chipUmarTpl">Desain Canva Khusus</span>
+            <span class="class-card-cta">Buka Ruang Kerja ➔</span>
+          </div>
+        </div>
+      </button>
+    </div>
+  </nav>
+
   <main id="main"><div class="panel loading">Memuat data kelas…</div></main>
 </div>
 <div id="stage" aria-hidden="true"></div>
@@ -106,14 +157,335 @@ const PARA_SECTIONS = [
 ];
 const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
-/* ================= State ================= */
-const S = { kelas: null, students: [], sel: null, tab: "data", mode: "local", busy: false };
-let db = null, uid = null, sample = null, downloads = null;
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const rid = () => Math.random().toString(36).slice(2, 10);
 const h = (html) => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; };
+
+
+/* ================= CONTOH DATA KELAS VII IBNU KHALDUN ================= */
+const CONTOH_KELAS_IBNU_KHALDUN = {
+  namaKelas: "7 Ibnu Khaldun",
+  labelTtd: "7 Ibnu Khaldun",
+  waliKelas: "Mochamad Asroru P, S.Pd, G.r",
+  kota: "Depok",
+  periode: "Oktober",
+  tahun: "2026",
+  tanggalCetak: "2026-10-31",
+  sapaan: "Ananda",
+  templateId: "builtin_ibnu",
+  fotoBersama: "",
+  ttd: DEFAULT_TTD_SRC,
+  labelFoto1: "Pendidikan",
+  labelFoto2: "Pendidikan",
+  kegiatan: [
+    { id: "ik_k1", nama: "sarapan sehat bersama", tanggal: "8 Oktober" },
+    { id: "ik_k2", nama: "Muhadoroh", tanggal: "15 Oktober" },
+    { id: "ik_k3", nama: "Lomba Bulan Bahasa", tanggal: "22 Oktober" },
+    { id: "ik_k4", nama: "program literasi sekolah", tanggal: "24 Oktober" },
+    { id: "ik_k5", nama: "pembiasaan salat Dhuha dan dzikir harian", tanggal: "" }
+  ],
+  kegiatanKeagamaan: [
+    { id: "ik_ka1", nama: "kegiatan Muhadoroh dan literasi Al-Qur'an", tanggal: "15 Oktober" },
+    { id: "ik_ka2", nama: "pembiasaan salat berjamaah, dzikir pagi, dan murojaah", tanggal: "" }
+  ]
+};
+
+const CONTOH_SISWA_AKBAR = {
+  nama: "Akbar Maulana Debianto",
+  panggilan: "Akbar",
+  contoh: true,
+  classId: "ibnu_khaldun_1",
+  foto1: DEFAULT_PHOTO_SRC,
+  foto2: DEFAULT_PHOTO_SRC,
+  fotoPortrait: DEFAULT_PHOTO_SRC,
+  fotoKegiatan: DEFAULT_PHOTO_SRC,
+  labelFoto1: "Pendidikan",
+  labelFoto2: "Pendidikan",
+  input: {
+    kategoriAkademik: "Sangat baik",
+    mapel: "Bahasa Indonesia, PAI, IPA, dan Bahasa Inggris",
+    mapelSulit: "Matematika dan Bahasa Arab",
+    catatanPM: "terus berproses memahami materi yang disampaikan dan menunjukkan kemauan untuk mengikuti pembelajaran dengan baik",
+    ekskul: "Futsal dan Pramuka",
+    kegiatanKhusus: "aktif mengikuti rangkaian Lomba Bulan Bahasa dan kegiatan Muhadoroh",
+    versiKeagamaan: "ringkas",
+    kegiatanKeagamaan: "mengikuti kegiatan Muhadoroh dengan tertib dan aktif dalam pembiasaan ibadah harian",
+    capaianTahfiz: "telah menyelesaikan hafalan juz 30 dan melanjutkan murojaah serta tajwid Al-Qur'an",
+    kategoriSosial: "Sangat baik",
+    interaksiSosial: "ramah, mudah bergaul, dan mampu berinteraksi serta bekerja sama dengan baik bersama teman maupun dalam kegiatan sekolah",
+    catatanSosial: "Sikap santun dan keaktifan Ananda dalam membantu kegiatan bersama menjadi hal positif yang perlu terus dipertahankan",
+    lomba: "Lomba Cipta Puisi Bulan Bahasa",
+    tglLomba: "22 Oktober",
+    prestasi: "Juara 2 Lomba Cipta Puisi",
+    tingkatLomba: "kompetisi tingkat sekolah",
+    sakit: "0",
+    izin: "0",
+    alfa: "0",
+    terlambat: "Tidak ada",
+    tglTerlambat: "",
+    disiplinUmum: "Sangat baik",
+    kategoriKesimpulan: "Sangat baik",
+    kelebihan: "Ananda juga berhasil meraih Juara 2 Lomba Cipta Puisi, yang menjadi pencapaian membanggakan atas kreativitas dan ketekunan Ananda",
+    dikembangkan: "pemahaman pada mata pelajaran yang masih dirasa sulit",
+    kegiatanSkip: [],
+    kegiatanKeagamaanSkip: []
+  },
+  final: {
+    akademik: [
+      "Dalam bidang akademik, Alhamdulillah, Ananda Akbar Maulana Debianto menunjukkan perkembangan yang sangat baik selama mengikuti proses pembelajaran di kelas 7. Ananda merasa lebih mudah memahami pembelajaran Bahasa Indonesia, PAI, IPA, dan Bahasa Inggris. Sementara itu, Matematika dan Bahasa Arab masih menjadi pembelajaran yang membutuhkan pemahaman lebih lanjut. Dalam kegiatan Pendalaman Materi (PM), Ananda terus berproses memahami materi yang disampaikan dan menunjukkan kemauan untuk mengikuti pembelajaran dengan baik."
+    ],
+    nonAkademik: [
+      "Dalam bidang non-akademik dan pengembangan diri, Ananda mengikuti kegiatan ekstrakurikuler Futsal dan Pramuka. Selama bulan Oktober, Ananda terlibat dalam berbagai kegiatan sekolah, di antaranya mengikuti sarapan sehat bersama pada tanggal 8 Oktober, kegiatan Muhadoroh pada tanggal 15 Oktober, Lomba Bulan Bahasa pada tanggal 22 Oktober, serta program literasi sekolah pada tanggal 24 Oktober. Ananda juga aktif mengikuti rangkaian Lomba Bulan Bahasa dan kegiatan Muhadoroh. Keterlibatan Ananda dalam kegiatan tersebut menjadi bagian dari proses pengembangan diri serta memberikan pengalaman berharga dalam berpartisipasi dan bekerja sama di lingkungan sekolah."
+    ],
+    keagamaan: [
+      "Pada aspek keagamaan dan pembinaan karakter, Ananda mengikuti kegiatan Muhadoroh dengan tertib dan aktif dalam pembiasaan ibadah harian. Dalam pembelajaran Tahfiz/Tahsin, Alhamdulillah, Ananda telah menyelesaikan hafalan juz 30 dan melanjutkan murojaah serta tajwid Al-Qur'an. Perkembangan ini menunjukkan semangat Ananda dalam mengikuti pembelajaran Al-Qur'an dan menjaga konsistensi dalam meningkatkan kemampuan bacaan serta hafalannya."
+    ],
+    sosial: [
+      "Dalam aspek sosial, Ananda menunjukkan perkembangan yang sangat baik. Ananda ramah, mudah bergaul, dan mampu berinteraksi serta bekerja sama dengan baik bersama teman maupun dalam kegiatan sekolah. Sikap santun dan keaktifan Ananda dalam membantu kegiatan bersama menjadi hal positif yang perlu terus dipertahankan."
+    ],
+    prestasi: [
+      "Pada bulan Oktober, Ananda mengikuti Lomba Cipta Puisi Bulan Bahasa pada tanggal 22 Oktober dan berhasil memperoleh Juara 2 Lomba Cipta Puisi. Pencapaian ini merupakan prestasi yang membanggakan dan menunjukkan kreativitas serta kerja keras Ananda dalam kompetisi tingkat sekolah."
+    ],
+    kedisiplinan: [
+      "Dalam aspek kehadiran dan kedisiplinan, Alhamdulillah selama bulan Oktober Ananda tidak memiliki keterangan sakit maupun izin. Kehadiran yang baik ini mendukung Ananda untuk dapat mengikuti proses pembelajaran dan berbagai kegiatan sekolah secara optimal."
+    ],
+    kesimpulan: [
+      "Alhamdulillah, Ananda Akbar Maulana Debianto menunjukkan perkembangan yang sangat baik selama bulan Oktober, baik dalam bidang akademik, kegiatan sekolah, keagamaan, maupun aspek sosial. Ananda juga berhasil meraih Juara 2 Lomba Cipta Puisi, yang menjadi pencapaian membanggakan atas kreativitas dan ketekunan Ananda. Diharapkan Ananda dapat terus mempertahankan semangat belajar dan prestasi yang telah dicapai, meningkatkan pemahaman pada mata pelajaran yang masih dirasa sulit, serta terus mengembangkan potensi dan kepercayaan dirinya agar dapat berkembang secara optimal."
+    ]
+  }
+};
+
+/* ================= CONTOH DATA KELAS IX UMAR BIN KHATTAB ================= */
+const CONTOH_KELAS_UMAR = {
+  namaKelas: "9 Umar Bin Khattab",
+  labelTtd: "9 Umar Bin Khattab",
+  waliKelas: "Syarifatu Zahro, S.Pd",
+  kota: "Depok",
+  periode: "September",
+  tahun: "2026",
+  tanggalCetak: "2026-09-30",
+  sapaan: "Ananda",
+  templateId: "builtin_umar",
+  fotoBersama: "",
+  ttd: DEFAULT_TTD_SRC,
+  labelFoto1: "Pendidikan",
+  labelFoto2: "Pendidikan",
+  kegiatan: [
+    { id: "k1", nama: "sarapan sehat", tanggal: "9 September" },
+    { id: "k2", nama: "rapat persiapan dokumen serah terima jabatan", tanggal: "11 September" },
+    { id: "k3", nama: "menjadi panitia LDKS", tanggal: "18–19 September" },
+    { id: "k4", nama: "Inspirational Class", tanggal: "23 September" },
+    { id: "k5", nama: "program Literasi", tanggal: "24 September" },
+    { id: "k6", nama: "apel Pelantikan OSIS", tanggal: "28 September" }
+  ],
+  kegiatanKeagamaan: [
+    { id: "ka1", nama: "kegiatan buka puasa bersama", tanggal: "17 September" },
+    { id: "ka2", nama: "pembiasaan salat berjamaah, dzikir, dan murojaah", tanggal: "" }
+  ]
+};
+
+const CONTOH_SISWA_FAIQAH = {
+  nama: "Faiqah Kamilah Ramadhani",
+  panggilan: "Faiqah",
+  contoh: true,
+  classId: "umar_bin_khattab_1",
+  foto1: DEFAULT_PHOTO_SRC,
+  foto2: DEFAULT_PHOTO_SRC,
+  fotoPortrait: DEFAULT_PHOTO_SRC,
+  fotoKegiatan: DEFAULT_PHOTO_SRC,
+  labelFoto1: "Pendidikan",
+  labelFoto2: "Pendidikan",
+  input: {
+    kategoriAkademik: "Sangat baik",
+    mapel: "Bahasa Indonesia, Bahasa Arab, IPS, dan Pendidikan Pancasila",
+    mapelSulit: "IPA, Matematika, dan Bahasa Korea",
+    catatanPM: "terus berproses memahami materi yang disampaikan dan menunjukkan kemauan untuk mengikuti pembelajaran dengan baik",
+    ekskul: "Badminton dan Tari",
+    kegiatanKhusus: "panitia wawancara kepengurusan OSIS periode 2026 pada tanggal 4 September",
+    versiKeagamaan: "ringkas",
+    kegiatanKeagamaan: "terlibat aktif dan membantu pelaksanaan kegiatan buka puasa bersama pada tanggal 17 September",
+    capaianTahfiz: "telah menyelesaikan satu surah dan melanjutkan ke surah berikutnya. Ananda juga telah melanjutkan pembelajaran Utsmani jilid 3",
+    kategoriSosial: "Sangat baik",
+    interaksiSosial: "mampu berinteraksi dan bekerja sama dengan baik dalam berbagai kegiatan bersama teman maupun dalam kegiatan sekolah",
+    catatanSosial: "Keaktifan Ananda dalam membantu kegiatan bersama juga menjadi hal positif yang perlu terus dipertahankan",
+    lomba: "Lomba Research DSCF",
+    tglLomba: "30 September",
+    prestasi: "Gold Medal DSCF",
+    tingkatLomba: "kegiatan penelitian dan kompetisi",
+    sakit: "0",
+    izin: "0",
+    alfa: "0",
+    terlambat: "Tidak ada",
+    tglTerlambat: "",
+    disiplinUmum: "Sangat baik",
+    kategoriKesimpulan: "Sangat baik",
+    kelebihan: "Ananda juga berhasil meraih Gold Medal DSCF, yang menjadi pencapaian membanggakan atas usaha dan keterlibatannya dalam kegiatan penelitian",
+    dikembangkan: "pemahaman pada mata pelajaran yang masih dirasa sulit",
+    kegiatanSkip: [],
+    kegiatanKeagamaanSkip: []
+  },
+  final: {
+    akademik: [
+      "Dalam bidang akademik, Alhamdulillah, Ananda Faiqah Kamilah Ramadhani menunjukkan perkembangan yang sangat baik selama mengikuti proses pembelajaran di kelas 9. Ananda merasa lebih mudah memahami pembelajaran Bahasa Indonesia, Bahasa Arab, IPS, dan Pendidikan Pancasila. Sementara itu, IPA, Matematika, dan Bahasa Korea masih menjadi pembelajaran yang membutuhkan pemahaman lebih lanjut. Dalam kegiatan Pendalaman Materi (PM), Ananda terus berproses memahami materi yang disampaikan dan menunjukkan kemauan untuk mengikuti pembelajaran dengan baik."
+    ],
+    nonAkademik: [
+      "Dalam bidang non-akademik dan pengembangan diri, Ananda mengikuti kegiatan ekstrakurikuler Badminton dan Tari. Selama bulan September, Ananda terlibat dalam berbagai kegiatan sekolah, di antaranya mengikuti sarapan sehat pada tanggal 9 September, rapat persiapan dokumen serah terima jabatan pada tanggal 11 September, menjadi panitia LDKS pada tanggal 18–19 September, Inspirational Class pada tanggal 23 September, program Literasi pada tanggal 24 September, serta apel Pelantikan OSIS pada tanggal 28 September. Ananda juga terlibat sebagai panitia wawancara kepengurusan OSIS periode 2026 pada tanggal 4 September. Keterlibatan Ananda dalam kegiatan tersebut menjadi bagian dari proses pengembangan diri serta memberikan pengalaman dalam berpartisipasi dan bekerja sama di lingkungan sekolah."
+    ],
+    keagamaan: [
+      "Pada aspek keagamaan dan pembinaan karakter, Ananda terlibat aktif dan membantu pelaksanaan kegiatan buka puasa bersama pada tanggal 17 September. Dalam pembelajaran Tahfiz/Tahsin, Alhamdulillah, Ananda telah menyelesaikan satu surah dan melanjutkan ke surah berikutnya. Ananda juga telah melanjutkan pembelajaran Utsmani jilid 3. Perkembangan ini menunjukkan semangat Ananda dalam mengikuti pembelajaran Al-Qur'an dan menjaga konsistensi dalam meningkatkan kemampuan bacaannya."
+    ],
+    sosial: [
+      "Dalam aspek sosial, Ananda menunjukkan perkembangan yang sangat baik. Ananda mampu berinteraksi dan bekerja sama dengan baik dalam berbagai kegiatan bersama teman maupun dalam kegiatan sekolah. Keaktifan Ananda dalam membantu kegiatan bersama juga menjadi hal positif yang perlu terus dipertahankan."
+    ],
+    prestasi: [
+      "Pada bulan September, Ananda mengikuti Lomba Research DSCF pada tanggal 30 September dan berhasil memperoleh Gold Medal DSCF. Pencapaian ini merupakan prestasi yang sangat baik dan menunjukkan kemampuan serta kerja keras Ananda dalam mengikuti kegiatan penelitian dan kompetisi."
+    ],
+    kedisiplinan: [
+      "Dalam aspek kehadiran dan kedisiplinan, Alhamdulillah selama bulan September Ananda tidak memiliki keterangan sakit maupun izin. Kehadiran yang baik ini mendukung Ananda untuk dapat mengikuti proses pembelajaran dan berbagai kegiatan sekolah secara optimal."
+    ],
+    kesimpulan: [
+      "Alhamdulillah, Ananda Faiqah Kamilah Ramadhani menunjukkan perkembangan yang sangat baik selama bulan September, baik dalam bidang akademik, kegiatan sekolah, keagamaan, maupun aspek sosial. Ananda juga berhasil meraih Gold Medal DSCF, yang menjadi pencapaian membanggakan atas usaha dan keterlibatannya dalam kegiatan penelitian. Diharapkan Ananda dapat terus mempertahankan semangat belajar dan prestasi yang telah dicapai, meningkatkan pemahaman pada mata pelajaran yang masih dirasa sulit, serta terus mengembangkan potensi dan kepercayaan dirinya agar dapat berkembang secara optimal."
+    ]
+  }
+};
+
+const CONTOH_SISWA_BAIM = {
+  nama: "Baim",
+  panggilan: "Baim",
+  contoh: true,
+  classId: "umar_bin_khattab_1",
+  foto1: DEFAULT_PHOTO_SRC,
+  foto2: DEFAULT_PHOTO_SRC,
+  fotoPortrait: DEFAULT_PHOTO_SRC,
+  fotoKegiatan: DEFAULT_PHOTO_SRC,
+  labelFoto1: "Pendidikan",
+  labelFoto2: "Pendidikan",
+  input: {
+    kategoriAkademik: "Baik",
+    mapel: "PJOK dan Informatika",
+    mapelSulit: "Matematika dan IPA",
+    catatanPM: "terus berproses memahami materi yang disampaikan dan menunjukkan kemauan untuk mengikuti pembelajaran dengan baik",
+    sikapBelajar: "cukup aktif dan antusias saat kegiatan praktik",
+    positifBelajar: "mau bertanya dan mudah berbaur dengan teman sekelas",
+    tingkatkanBelajar: "meningkatkan ketelitian dalam mengerjakan tugas serta mengurangi mengobrol saat jam pelajaran",
+    kegiatanKhusus: "",
+    ekskul: "Futsal",
+    peran: "aktif bekerja sama dalam tim",
+    catatanPengembangan: "",
+    versiKeagamaan: "versi2",
+    capaianTahfiz: "progres saat ini telah mencapai Utsmani jilid 4 halaman 18",
+    sholatWajib: "Cukup",
+    dhuha: "Cukup",
+    murojaah: "Cukup",
+    tahfiz: "Baik",
+    shaum: "Baik",
+    kegiatanKeagamaan: "kegiatan buka puasa bersama pada tanggal 17 September",
+    peranMuhadhoroh: "",
+    perluDibina: "terkadang masih terlihat bercanda atau mengobrol dengan teman, serta perlu diingatkan agar segera menuju aula atau musala ketika waktu kegiatan tiba",
+    kategoriSosial: "Baik",
+    interaksiSosial: "mampu berinteraksi dengan baik dan mudah bergaul bersama teman-temannya",
+    catatanSosial: "Sikap ramah dan mudah bergaul menjadi hal positif yang perlu dipertahankan",
+    prestasi: "",
+    lomba: "",
+    tingkatLomba: "",
+    sakit: "0",
+    izin: "0",
+    alfa: "0",
+    terlambat: "Tidak ada",
+    tglTerlambat: "",
+    disiplinUmum: "Cukup baik",
+    kategoriKesimpulan: "Baik",
+    kelebihan: "sikapnya yang mudah bergaul, bersemangat dalam kegiatan olahraga, dan memiliki kerja sama tim yang baik",
+    dikembangkan: "ketertiban dan kekhusyukan saat kegiatan ibadah serta fokus saat pembelajaran di kelas",
+    kegiatanSkip: ["k2", "k3"],
+    kegiatanKeagamaanSkip: []
+  },
+  final: {
+    akademik: [
+      "Dalam bidang akademik, Alhamdulillah, Ananda Baim menunjukkan perkembangan yang baik selama mengikuti proses pembelajaran di kelas 9. Ananda merasa lebih mudah memahami pembelajaran PJOK dan Informatika. Sementara itu, Matematika dan IPA masih menjadi pembelajaran yang membutuhkan pemahaman lebih lanjut. Dalam kegiatan Pendalaman Materi (PM), Ananda terus berproses memahami materi yang disampaikan dan menunjukkan kemauan untuk mengikuti pembelajaran dengan baik."
+    ],
+    nonAkademik: [
+      "Dalam bidang non-akademik dan pengembangan diri, Ananda mengikuti kegiatan ekstrakurikuler Futsal. Selama bulan September, Ananda terlibat dalam berbagai kegiatan sekolah, di antaranya mengikuti sarapan sehat pada tanggal 9 September, Inspirational Class pada tanggal 23 September, program Literasi pada tanggal 24 September, serta apel Pelantikan OSIS pada tanggal 28 September. Keterlibatan Ananda dalam kegiatan tersebut menjadi bagian dari proses pengembangan diri serta memberikan pengalaman dalam berpartisipasi dan bekerja sama di lingkungan sekolah."
+    ],
+    keagamaan: [
+      "Pada aspek keagamaan dan pembinaan karakter, Ananda mengikuti kegiatan buka puasa bersama pada tanggal 17 September. Dalam pelaksanaan salat berjamaah, dzikir, dan murojaah, Ananda terkadang masih terlihat bercanda atau mengobrol dengan teman, serta perlu diingatkan agar segera menuju aula atau musala ketika waktu kegiatan tiba. Ke depannya, Ananda diharapkan dapat lebih menjaga ketertiban, meningkatkan kedisiplinan, dan mengikuti kegiatan keagamaan dengan lebih khusyuk. Dalam pembelajaran Tahfiz/Tahsin, progres Ananda saat ini telah mencapai Utsmani jilid 4 halaman 18. Semoga Ananda dapat terus memperbaiki kebiasaan tersebut dan meningkatkan semangat serta konsistensi dalam beribadah dan belajar membaca Al-Qur'an."
+    ],
+    sosial: [
+      "Dalam aspek sosial, Ananda menunjukkan perkembangan yang baik. Ananda mampu berinteraksi dengan baik dan mudah bergaul bersama teman-temannya dalam berbagai kegiatan sekolah. Sikap ramah dan mudah bergaul menjadi hal positif yang perlu dipertahankan."
+    ],
+    prestasi: [
+      "Pada bulan September, Ananda belum mengikuti perlombaan maupun memperoleh prestasi. Meskipun demikian, Ananda tetap memiliki kesempatan untuk mengembangkan potensi dan mencoba berbagai kegiatan positif pada kesempatan berikutnya."
+    ],
+    kedisiplinan: [
+      "Dalam aspek kehadiran dan kedisiplinan, Alhamdulillah selama bulan September Ananda tidak memiliki keterangan sakit maupun izin. Kehadiran yang baik ini mendukung Ananda untuk dapat mengikuti proses pembelajaran dan berbagai kegiatan sekolah secara optimal."
+    ],
+    kesimpulan: [
+      "Alhamdulillah, Ananda Baim menunjukkan perkembangan yang baik selama bulan September, baik dalam bidang akademik, kegiatan sekolah, keagamaan, maupun aspek sosial. Sikapnya yang mudah bergaul, bersemangat dalam kegiatan olahraga, dan memiliki kerja sama tim yang baik menjadi modal yang sangat baik bagi perkembangannya. Diharapkan Ananda dapat terus mempertahankan semangat belajar dan prestasi yang telah dicapai, meningkatkan ketertiban dan kekhusyukan saat kegiatan ibadah serta fokus saat pembelajaran di kelas, serta terus mengembangkan potensi dan kepercayaan dirinya agar dapat berkembang secara optimal."
+    ]
+  }
+};
+
+const CONTOH_KELAS = CONTOH_KELAS_UMAR;
+const CONTOH_SISWA = CONTOH_SISWA_FAIQAH;
+
+
+/* ================= State Multi-Kelas Terpisah (Ibnu Khaldun 1 & Umar Bin Khattab 1) ================= */
+const S = {
+  activeClass: "ibnu_khaldun_1",
+  classes: {
+    ibnu_khaldun_1: {
+      id: "ibnu_khaldun_1",
+      namaMenu: "KELAS IBNU KHALDUN 1",
+      subJudul: "Kelas VII Ibnu Khaldun",
+      kelas: structuredClone(CONTOH_KELAS_IBNU_KHALDUN),
+      students: [{ id: "s_" + rid(), urut: Date.now(), classId: "ibnu_khaldun_1", ...structuredClone(CONTOH_SISWA_AKBAR) }],
+      sel: null,
+      tab: "pratinjau",
+      filter: ""
+    },
+    umar_bin_khattab_1: {
+      id: "umar_bin_khattab_1",
+      namaMenu: "KELAS UMAR BIN KHATTAB 1",
+      subJudul: "Kelas IX Umar Bin Khattab",
+      kelas: structuredClone(CONTOH_KELAS_UMAR),
+      students: [
+        { id: "s_" + rid(), urut: Date.now(), classId: "umar_bin_khattab_1", ...structuredClone(CONTOH_SISWA_FAIQAH) },
+        { id: "s_" + rid(), urut: Date.now() + 1, classId: "umar_bin_khattab_1", ...structuredClone(CONTOH_SISWA_BAIM) }
+      ],
+      sel: null,
+      tab: "pratinjau",
+      filter: ""
+    }
+  },
+  mode: "local",
+  busy: false
+};
+
+// Getter dan Setter transparan pada S untuk kompatibilitas penuh seluruh fitur yang sudah ada
+Object.defineProperty(S, "kelas", {
+  get() { return S.classes[S.activeClass]?.kelas || null; },
+  set(v) { if (S.classes[S.activeClass]) S.classes[S.activeClass].kelas = v; }
+});
+Object.defineProperty(S, "students", {
+  get() { return S.classes[S.activeClass]?.students || []; },
+  set(v) { if (S.classes[S.activeClass]) S.classes[S.activeClass].students = v; }
+});
+Object.defineProperty(S, "sel", {
+  get() { return S.classes[S.activeClass]?.sel || null; },
+  set(v) { if (S.classes[S.activeClass]) S.classes[S.activeClass].sel = v; }
+});
+Object.defineProperty(S, "tab", {
+  get() { return S.classes[S.activeClass]?.tab || "data"; },
+  set(v) { if (S.classes[S.activeClass]) S.classes[S.activeClass].tab = v; }
+});
+Object.defineProperty(S, "filter", {
+  get() { return S.classes[S.activeClass]?.filter || ""; },
+  set(v) { if (S.classes[S.activeClass]) S.classes[S.activeClass].filter = v; }
+});
+
+let db = null, uid = null, sample = null, downloads = null;
 
 function toast(msg, ms = 3200) {
   const el = h(`<div class="toast" role="status">${esc(msg)}</div>`);
@@ -133,8 +505,9 @@ function statusOf(s) {
 }
 const STATUS_LABEL = { kosong: "Belum diisi", draf: "Data terisi", siap: "Siap cetak" };
 
-/* ================= Penyimpanan (db per wali kelas, cadangan localStorage) ================= */
-const LS_KEY = "profil-siswa-v1";
+/* ================= Penyimpanan Multi-Kelas Terisolasi ================= */
+const LS_KEY = "profil-siswa-multiclass-v2";
+const LS_LEGACY_KEY = "profil-siswa-v1";
 const timers = {}, inflight = {}, again = {};
 let pendingWrites = 0;
 
@@ -142,11 +515,17 @@ function setSaveState(t) { $("#saveState").textContent = t; }
 function docData(id) {
   if (id === "kelas") return S.kelas;
   const s = S.students.find((x) => x.id === id);
-  return s ? { ...s, id: undefined } : null;
+  return s ? { ...s, classId: S.activeClass, id: undefined } : null;
 }
 function lsWrite() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify({ kelas: S.kelas, students: S.students })); }
-  catch (e) { toast("Penyimpanan browser penuh. Kurangi ukuran foto."); }
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      activeClass: S.activeClass,
+      classes: S.classes
+    }));
+  } catch (e) {
+    toast("Penyimpanan browser penuh. Kurangi ukuran foto.");
+  }
 }
 function queueSave(id) {
   setSaveState("Menyimpan…");
@@ -159,9 +538,12 @@ async function flush(id) {
   try {
     const data = docData(id);
     if (S.mode === "db") {
-      const ref = db.collection("data/users/" + uid).doc(id);
+      const docKey = id === "kelas" ? `kelas_${S.activeClass}` : id;
+      const ref = db.collection("data/users/" + uid).doc(docKey);
       if (data) await ref.set(JSON.parse(JSON.stringify(data))); else await ref.delete();
-    } else lsWrite();
+    } else {
+      lsWrite();
+    }
   } catch (e) {
     if (e && e.code === "invalid_argument") toast("Tidak bisa menyimpan. Pastikan Anda punya akses Contributor dan ukuran foto tidak terlalu besar.", 5000);
     else toast("Gagal menyimpan: " + (e?.message || e?.code || "coba lagi"));
@@ -182,13 +564,67 @@ async function loadAll() {
   if (S.mode === "db") {
     const snap = await db.collection("data/users/" + uid).get();
     for (const doc of snap.docs) {
-      if (doc.id === "kelas") S.kelas = doc.data();
-      else if (doc.id.startsWith("s_")) S.students.push({ ...doc.data(), id: doc.id });
+      if (doc.id.startsWith("kelas_")) {
+        const cId = doc.id.replace("kelas_", "");
+        if (S.classes[cId]) S.classes[cId].kelas = doc.data();
+      } else if (doc.id.startsWith("s_")) {
+        const d = doc.data();
+        const cId = d.classId || "umar_bin_khattab_1";
+        if (S.classes[cId]) {
+          S.classes[cId].students.push({ ...d, id: doc.id });
+        }
+      }
     }
   } else {
-    try { const raw = localStorage.getItem(LS_KEY); if (raw) { const o = JSON.parse(raw); S.kelas = o.kelas; S.students = o.students || []; } } catch (e) { /* kosong */ }
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        const o = JSON.parse(raw);
+        if (o.classes) {
+          for (const k of Object.keys(o.classes)) {
+            if (S.classes[k]) {
+              S.classes[k].kelas = o.classes[k].kelas || S.classes[k].kelas;
+              S.classes[k].students = o.classes[k].students || [];
+              S.classes[k].sel = o.classes[k].sel || (S.classes[k].students[0]?.id || null);
+              S.classes[k].tab = o.classes[k].tab || "pratinjau";
+            }
+          }
+        }
+        if (o.activeClass && S.classes[o.activeClass]) {
+          S.activeClass = o.activeClass;
+        }
+      } else {
+        const legRaw = localStorage.getItem(LS_LEGACY_KEY);
+        if (legRaw) {
+          const leg = JSON.parse(legRaw);
+          if (leg.kelas) S.classes.umar_bin_khattab_1.kelas = leg.kelas;
+          if (leg.students && leg.students.length) S.classes.umar_bin_khattab_1.students = leg.students;
+        }
+      }
+    } catch (e) { /* kosong */ }
   }
-  S.students.sort((a, b) => (a.urut ?? 0) - (b.urut ?? 0));
+
+  // Pastikan setiap kelas memiliki inisialisasi lengkap
+  for (const cid of Object.keys(S.classes)) {
+    const cls = S.classes[cid];
+    if (!cls.kelas) {
+      cls.kelas = structuredClone(cid === "ibnu_khaldun_1" ? CONTOH_KELAS_IBNU_KHALDUN : CONTOH_KELAS_UMAR);
+    }
+    if (!cls.students || !cls.students.length) {
+      if (cid === "ibnu_khaldun_1") {
+        cls.students = [{ id: "s_" + rid(), urut: Date.now(), classId: "ibnu_khaldun_1", ...structuredClone(CONTOH_SISWA_AKBAR) }];
+      } else {
+        cls.students = [
+          { id: "s_" + rid(), urut: Date.now(), classId: "umar_bin_khattab_1", ...structuredClone(CONTOH_SISWA_FAIQAH) },
+          { id: "s_" + rid(), urut: Date.now() + 1, classId: "umar_bin_khattab_1", ...structuredClone(CONTOH_SISWA_BAIM) }
+        ];
+      }
+    }
+    cls.students.sort((a, b) => (a.urut ?? 0) - (b.urut ?? 0));
+    if (!cls.sel || !cls.students.some((x) => x.id === cls.sel)) {
+      cls.sel = cls.students[0]?.id || null;
+    }
+  }
 }
 
 /* ================= Gambar: kompres foto ================= */
@@ -805,8 +1241,36 @@ function getTemplatePhotoFrames(tpl, s) {
 
 const SHAPES = { cloud: "Awan (4 Lengkung)", hexagon: "Heksagon", circle: "Lingkaran", rounded: "Kotak membulat", rect: "Kotak" };
 const DEFAULT_BODY = { font: "Plus Jakarta Sans", sizePt: 10.3, color: "#1f1d1a", lineHeight: 1.56, indentMm: 7.5, gapMm: 3.4 };
-const BUILTIN = { id: "builtin", nama: "Bawaan: Profil Siswa Al Fakhir (Awan & Papan Catur)", builtin: true, body: { ...DEFAULT_BODY },
-  els: [{ id: "b1", kind: "body", page: "first", x: 8.5, y: 83.5, w: 193, h: 204 }, { id: "b2", kind: "body", page: "next", x: 8.5, y: 29.5, w: 193, h: 258 }] };
+const BUILTIN_UMAR = {
+  id: "builtin_umar",
+  classId: "umar_bin_khattab_1",
+  nama: "Bawaan: Profil Siswa 9 Umar Bin Khattab (Awan & Papan Catur)",
+  builtin: true,
+  body: { ...DEFAULT_BODY },
+  els: [
+    { id: "b1", kind: "body", page: "first", x: 8.5, y: 83.5, w: 193, h: 204 },
+    { id: "b2", kind: "body", page: "next", x: 8.5, y: 29.5, w: 193, h: 258 }
+  ]
+};
+
+const BUILTIN_IBNU = {
+  id: "builtin_ibnu",
+  classId: "ibnu_khaldun_1",
+  nama: "Bawaan: Profil Siswa 7 Ibnu Khaldun (Awan & Papan Catur)",
+  builtin: true,
+  body: { ...DEFAULT_BODY },
+  els: [
+    { id: "b1", kind: "body", page: "first", x: 8.5, y: 83.5, w: 193, h: 204 },
+    { id: "b2", kind: "body", page: "next", x: 8.5, y: 29.5, w: 193, h: 258 }
+  ]
+};
+
+const BUILTIN = BUILTIN_UMAR;
+
+function getBuiltinForClass(classId) {
+  return (classId || S.activeClass) === "ibnu_khaldun_1" ? BUILTIN_IBNU : BUILTIN_UMAR;
+}
+
 const T = { list: [], imgs: new Map() };
 const TPL_LS = "profil-siswa-tpl-v1";
 
@@ -882,7 +1346,17 @@ function getLayoutPresetElements(presetKey = "canvaFull", photoCount = 0, photoS
 
 function newTemplate(photoCount = 0, photoShape = "rounded", photoBorder = "#ffffff", layoutPreset = "canvaFull", bodyTopY = 88) {
   const els = getLayoutPresetElements(layoutPreset, photoCount, photoShape, photoBorder, bodyTopY);
-  return { id: "t_" + rid(), type: "meta", nama: "Desain baru", createdAt: Date.now(), bg: { first: false, next: false }, body: { ...DEFAULT_BODY }, els };
+  const classLabel = S.activeClass === "ibnu_khaldun_1" ? "Ibnu Khaldun 1" : "Umar 1";
+  return {
+    id: "t_" + rid(),
+    type: "meta",
+    classId: S.activeClass,
+    nama: "Desain baru " + classLabel,
+    createdAt: Date.now(),
+    bg: { first: false, next: false },
+    body: { ...DEFAULT_BODY },
+    els
+  };
 }
 const lsTpl = () => { try { return JSON.parse(localStorage.getItem(TPL_LS)) || { list: [], imgs: {} }; } catch (e) { return { list: [], imgs: {} }; } };
 async function loadTemplates() {
@@ -892,6 +1366,8 @@ async function loadTemplates() {
       T.list = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
     } else T.list = lsTpl().list;
   } catch (e) { T.list = []; }
+  // Pastikan desain bawaan / lama otomatis memiliki classId
+  T.list.forEach((t) => { if (!t.classId) t.classId = "umar_bin_khattab_1"; });
   T.list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 }
 async function getTplImage(docId) {
@@ -904,8 +1380,8 @@ async function getTplImage(docId) {
   T.imgs.set(docId, data); return data;
 }
 async function saveTemplate(t, imgs) {
-  // imgs: { first?: dataURL|null, next?: dataURL|null } hanya yang berubah
   const meta = JSON.parse(JSON.stringify(t)); delete meta.bgFirstSrc; delete meta.bgNextSrc;
+  if (!meta.classId) meta.classId = S.activeClass; // Ikat ketat ke kelas aktif
   for (const k of Object.keys(imgs)) meta.bg[k] = !!imgs[k];
   if (S.mode === "db") {
     for (const [k, v] of Object.entries(imgs)) {
@@ -932,9 +1408,18 @@ async function deleteTemplate(t) {
     localStorage.setItem(TPL_LS, JSON.stringify(o));
   }
   T.list = T.list.filter((x) => x.id !== t.id);
-  if (S.kelas?.templateId === t.id) { S.kelas.templateId = "builtin"; queueSave("kelas"); }
+  const curBuiltin = getBuiltinForClass(S.activeClass);
+  if (S.kelas?.templateId === t.id) { S.kelas.templateId = curBuiltin.id; queueSave("kelas"); }
 }
-function activeTplMeta() { return T.list.find((t) => t.id === S.kelas?.templateId) || BUILTIN; }
+function activeTplMeta() {
+  const curBuiltin = getBuiltinForClass(S.activeClass);
+  const curId = S.kelas?.templateId;
+  if (!curId || curId === "builtin" || curId === curBuiltin.id || curId === "builtin_umar" || curId === "builtin_ibnu") {
+    return curBuiltin;
+  }
+  const found = T.list.find((t) => t.id === curId && t.classId === S.activeClass);
+  return found || curBuiltin;
+}
 async function resolveTpl(meta) {
   if (meta.builtin) return meta;
   const [f, n] = await Promise.all([meta.bg?.first ? getTplImage(`${meta.id}_first`) : null, meta.bg?.next ? getTplImage(`${meta.id}_next`) : null]);
@@ -1660,15 +2145,17 @@ function warningsFor(s) {
 /* ================= Modal: Upload Desain Canva ================= */
 async function openUploadCanvaModal() {
   await loadTemplates();
-  const defName = `Desain ${S.kelas?.periode || "Bulanan"} ${S.kelas?.tahun || (S.kelas?.tanggalCetak || "").slice(0, 4) || new Date().getFullYear()}`;
+  const currentClassTitle = S.activeClass === "ibnu_khaldun_1" ? "Kelas Ibnu Khaldun 1" : "Kelas Umar Bin Khattab 1";
+  const defName = `Desain ${S.kelas?.periode || "Bulanan"} ${S.kelas?.tahun || (S.kelas?.tanggalCetak || "").slice(0, 4) || new Date().getFullYear()} (${S.activeClass === "ibnu_khaldun_1" ? "7 Ibnu Khaldun" : "9 Umar"})`;
   let extracted = null;
 
   const el = h(`<div class="overlay" role="dialog" aria-modal="true" aria-label="Upload Desain Canva">
     <div class="dialog" style="width:min(580px,100%);max-height:calc(100vh - 32px);overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px">
         <div>
+          <div style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800;background:var(--accent-soft);color:var(--accent-deep);margin-bottom:6px">🎨 RUANG KERJA CANVA: ${esc(currentClassTitle.toUpperCase())}</div>
           <h3 style="margin:0 0 4px">🎨 Upload Desain Baru Canva</h3>
-          <p style="margin:0;font-size:13px;color:var(--muted)">Ganti desain profil siswa setiap bulan. Unggah file PDF Canva (otomatis 2 halaman) atau gambar PNG/JPG ukuran A4.</p>
+          <p style="margin:0;font-size:13px;color:var(--muted)">Desain akan disimpan khusus untuk <b>${esc(currentClassTitle)}</b> dan tidak memengaruhi kelas lainnya. Unggah file PDF Canva (otomatis 2 halaman) atau gambar PNG/JPG ukuran A4.</p>
         </div>
         <div style="display:flex;gap:6px;flex:none">
           <button class="btn sm" id="upCancelTop" type="button">Batal</button>
@@ -1908,6 +2395,7 @@ async function openUploadCanvaModal() {
         tpl = newTemplate(pCount, pShape, pBorder, pPreset);
         descInfo = `${pCount} frame foto`;
       }
+      tpl.classId = S.activeClass; // Ruang kerja Canva terpisah per kelas
       tpl.nama = $("#canvaName", el).value.trim() || defName;
       const imgs = { first: extracted.first, next: extracted.next || extracted.first };
       const saved = await saveTemplate(tpl, imgs);
@@ -1919,7 +2407,7 @@ async function openUploadCanvaModal() {
       }
       close();
       render();
-      toast(`🎉 Desain "${saved.nama}" berhasil disimpan (${descInfo})${setActive ? " dan dipasang!" : "."}`);
+      toast(`🎉 Desain "${saved.nama}" berhasil disimpan khusus untuk ${currentClassTitle}${setActive ? " dan langsung dipasang!" : "."}`);
       if (S.sel) {
         S.tab = "pratinjau";
         renderWork();
@@ -1932,12 +2420,18 @@ async function openUploadCanvaModal() {
   };
 }
 
-/* ================= Menu Desain PDF ================= */
+/* ================= Menu Desain PDF Terpisah Per Kelas ================= */
 async function openTemplates() {
   await loadTemplates();
-  const el = h(`<div class="overlay" role="dialog" aria-modal="true" aria-label="Desain PDF"><div class="dialog" style="width:min(820px,100%);max-height:calc(100vh - 32px);overflow:auto">
+  const curBuiltin = getBuiltinForClass(S.activeClass);
+  const currentClassTitle = S.activeClass === "ibnu_khaldun_1" ? "Kelas Ibnu Khaldun 1 (Kelas VII)" : "Kelas Umar Bin Khattab 1 (Kelas IX)";
+  const el = h(`<div class="overlay" role="dialog" aria-modal="true" aria-label="Desain PDF"><div class="dialog" style="width:min(860px,100%);max-height:calc(100vh - 32px);overflow:auto">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-      <div><h3>Koleksi Desain Dokumen</h3><p style="margin:0">Pilih desain aktif untuk kelas ini, atau unggah desain baru dari Canva setiap bulan.</p></div>
+      <div>
+        <div style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800;background:var(--accent-soft);color:var(--accent-deep);margin-bottom:6px">🎨 RUANG DESAIN CANVA: ${esc(currentClassTitle.toUpperCase())}</div>
+        <h3 style="margin:0 0 4px">Koleksi Desain Dokumen</h3>
+        <p style="margin:0;font-size:13px;color:var(--muted)">Desain di bawah ini khusus untuk <b>${esc(currentClassTitle)}</b>. Seluruh desain, template Canva, dan pengeditan tersimpan terpisah dan tidak akan memengaruhi kelas lainnya.</p>
+      </div>
       <div style="display:flex;gap:6px">
         <button class="btn sm" id="tCancelTop" type="button">Batal</button>
         <button class="btn sm ghost danger" id="tClose" type="button">✕ Keluar</button>
@@ -1946,7 +2440,7 @@ async function openTemplates() {
     <div class="tpl-list" id="tList"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn primary" id="tUploadCanva" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>+ Upload Desain Canva (PDF / Gambar)</span></button>
+        <button class="btn primary" id="tUploadCanva" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>+ Upload Desain Canva untuk ${S.activeClass === "ibnu_khaldun_1" ? "Ibnu Khaldun 1" : "Umar 1"}</span></button>
         <button class="btn" id="tNew" type="button">+ Desain Manual (Editor)</button>
       </div>
       <div style="display:flex;gap:8px">
@@ -1988,7 +2482,8 @@ async function openTemplates() {
     });
     return c;
   };
-  const paint = () => list.replaceChildren(card(BUILTIN), ...T.list.map(card));
+  const classTemplates = T.list.filter((t) => t.classId === S.activeClass);
+  const paint = () => list.replaceChildren(card(curBuiltin), ...classTemplates.map(card));
   paint();
 }
 
@@ -2212,122 +2707,81 @@ function openEditor(t, isNew) {
   })();
 }
 
-/* ================= Contoh data (9 Umar Bin Khatab - Oktober 2026) ================= */
-const CONTOH_KELAS = {
-  namaKelas: "9 Umar Bin Khatab", labelTtd: "9 Umar Bin Khatab", waliKelas: "Syarifatu Zahro, S.Pd", kota: "Depok",
-  periode: "Oktober", tahun: "2026", tanggalCetak: "2026-10-09", sapaan: "Ananda", templateId: "builtin", fotoBersama: "", ttd: DEFAULT_TTD_SRC,
-  kegiatan: [
-    { id: "k1", nama: "AEP (Al Fakhir Enrichment Program)", tanggal: "18–22 Juli 2026" },
-    { id: "k2", nama: "Debat OSIS", tanggal: "3 Agustus 2026" },
-    { id: "k3", nama: "Memberikan suara pada Pemilihan Ketua & Wakil OSIS", tanggal: "7 Agustus 2026" },
-    { id: "k4", nama: "Cek kesehatan", tanggal: "31 Agustus 2026" },
-    { id: "k5", nama: "Muhadhoroh pekanan", tanggal: "" }
-  ],
-  kegiatanKeagamaan: [
-    { id: "ka1", nama: "buka puasa bersama", tanggal: "17 September" },
-    { id: "ka2", nama: "Dzikir Al-Ma'tsurat dan kajian rutin", tanggal: "" }
-  ],
-};
-const CONTOH_SISWA = {
-  nama: "Dzakira Nurul Matine", panggilan: "Dzakira", contoh: true,
-  foto1: DEFAULT_PHOTO_SRC, foto2: DEFAULT_PHOTO_SRC, fotoPortrait: DEFAULT_PHOTO_SRC, fotoKegiatan: DEFAULT_PHOTO_SRC,
-  labelFoto1: "Pendidikan", labelFoto2: "Pendidikan",
-  input: { mapel: "Pendidikan Pancasila, PJOK, Matematika, dan IPS", sikapBelajar: "Aktif dan komunikatif selama proses pembelajaran berlangsung", positifBelajar: "Keberanian dalam merespons penjelasan guru serta keaktifan dalam menghidupkan suasana diskusi di kelas",
-    tingkatkanBelajar: "Masih perlu terus berlatih menjaga fokus ketika guru sedang menyampaikan materi", kegiatanKhusus: "Inspirational Class", ekskul: "Badminton, Tari", peran: "Aktif serta mampu berinteraksi dengan baik bersama teman-temannya",
-    catatanPengembangan: "Sesekali masih perlu diarahkan agar tetap fokus saat kegiatan berlangsung",
-    versiKeagamaan: "tertib", capaianTahfiz: "perkembangan baik",
-    sholatWajib: "Baik", dhuha: "Baik", murojaah: "Baik", tahfiz: "Baik", shaum: "Baik",
-    kegiatanKeagamaan: "", peranMuhadhoroh: "Belum ada", perluDibina: "",
-    prestasi: "", lomba: "Estafet Sarung",
-    tingkatLomba: "Antarkelas di sekolah", sakit: "2", izin: "1", alfa: "0", terlambat: "Tidak ada", tglTerlambat: "", disiplinUmum: "Baik", kelebihan: "Aktif dan komunikatif",
-    dikembangkan: "Meningkatkan konsentrasi dan kefokusan saat menerima materi pembelajaran maupun kegiatan di sekolah", kegiatanSkip: ["k4", "k5"], kegiatanKeagamaanSkip: ["ka2"] },
-  final: {
-    akademik: [
-      "Dalam bidang akademik, Alhamdulillah Ananda Dzakira Nurul Matine menunjukkan perkembangan yang positif serta sikap belajar yang patut diapresiasi. Ananda dikenal aktif dan komunikatif selama proses pembelajaran berlangsung, serta memiliki antusiasme yang menonjol terutama pada mata pelajaran Pendidikan Pancasila, PJOK, Matematika, dan IPS. Hal positif yang tampak dari diri Ananda adalah keberaniannya dalam merespons penjelasan guru serta keaktifannya dalam menghidupkan suasana diskusi di kelas.",
-      "Namun demikian, berdasarkan pengamatan Bapak/Ibu guru, Ananda masih perlu terus berlatih menjaga fokus ketika guru sedang menyampaikan materi agar pemahaman yang diperoleh semakin utuh dan mendalam. Ke depannya, kami berharap Ananda Dzakira dapat mengelola perhatian dengan lebih baik sehingga potensi akademiknya yang baik dapat berkembang secara lebih optimal."
-    ],
-    nonAkademik: [
-      "Dalam bidang non-akademik dan pengembangan diri, Ananda Dzakira turut berpartisipasi dengan baik dalam berbagai agenda sekolah, yaitu *AEP (Al Fakhir Enrichment Program)* pada tanggal 18–22 Juli 2026, kegiatan Debat OSIS pada tanggal 3 Agustus 2026, serta ikut serta memberikan suara pada Pemilihan Ketua dan Wakil OSIS pada tanggal 7 Agustus 2026. Selain kegiatan umum tersebut, Ananda juga berpartisipasi aktif dalam kegiatan *Inspirational Class* di sekolah.",
-      "Untuk menyalurkan minat dan bakatnya, Ananda mengikuti kegiatan ekstrakurikuler *Badminton* dan Tari dengan penuh semangat. Dalam setiap aktivitas yang diikuti, Ananda menunjukkan peran yang aktif serta mampu berinteraksi dengan baik bersama teman-temannya, meskipun sesekali masih perlu diarahkan agar tetap fokus saat kegiatan berlangsung. Semoga Ananda Dzakira senantiasa bersemangat dalam mengembangkan bakat dan kemampuannya di berbagai bidang."
-    ],
-    keagamaan: [
-      "Pada aspek keagamaan dan pembinaan karakter, Ananda mengikuti kegiatan buka puasa bersama pada tanggal 17 September. Dalam pelaksanaan salat berjamaah, dzikir, dan murojaah, Ananda selalu datang tepat waktu ke aula atau musala serta mengikuti kegiatan dengan tertib dan disiplin. Dalam pembelajaran Tahfiz/Tahsin, perkembangan Ananda saat ini menunjukkan hasil yang baik. Semoga Ananda dapat terus menjaga semangat dan konsistensi dalam beribadah serta meningkatkan kemampuan membaca Al-Qur'an."
-    ],
-    prestasi: [
-      "Alhamdulillah, Ananda Dzakira juga turut berpartisipasi aktif dalam memeriahkan perlombaan tingkat antarkelas di sekolah, yaitu pada cabang lomba *Estafet Sarung*. Keikutsertaan ini menjadi pengalaman berharga bagi Ananda dalam melatih kekompakan, sportivitas, serta kerja sama tim bersama teman-teman sekelasnya."
-    ],
-    kedisiplinan: [
-      "Dalam aspek kehadiran dan kedisiplinan, tercatat Ananda tidak hadir karena sakit sebanyak 2 kali serta tidak hadir karena izin sebanyak 1 kali, tanpa adanya catatan alfa maupun keterlambatan hadir ke sekolah. Kami mendoakan semoga Ananda Dzakira senantiasa diberikan kesehatan yang prima, serta mengingatkan agar Ananda selalu menjaga kesehatan dan pola istirahatnya sehingga dapat mengikuti kegiatan pembelajaran di sekolah dengan optimal. Kami juga menyampaikan secara santun agar ke depannya Ananda dapat mengurangi izin apabila tidak terdapat keperluan yang mendesak dan terus menjaga konsistensi kehadirannya, mengingat kedisiplinan umum Ananda di sekolah sudah tergolong baik."
-    ],
-    kesimpulan: [
-      "Secara keseluruhan, Alhamdulillah Ananda Dzakira Nurul Matine merupakan siswi yang memiliki karakter positif, di mana sikap aktif dan komunikatif menjadi kelebihan yang paling menonjol dalam kesehariannya di sekolah. Semangat Ananda dalam belajar di kelas maupun berpartisipasi dalam berbagai kegiatan sekolah dan ekstrakurikuler menjadi modal yang sangat baik bagi perkembangannya.",
-      "Ke depannya, Ananda diharapkan dapat lebih meningkatkan konsentrasi dan kefokusannya saat menerima materi pembelajaran di kelas maupun mengikuti kegiatan di sekolah. Dengan latihan fokus yang konsisten serta pendampingan bersama antara guru di sekolah dan Ayah/Bunda di rumah, kami optimis Ananda Dzakira dapat meraih prestasi dan perkembangan karakter yang semakin membanggakan."
-    ]
-  },
-};
 
-const CONTOH_SISWA_BAIM = {
-  nama: "Baim", panggilan: "Baim", contoh: true,
-  foto1: DEFAULT_PHOTO_SRC, foto2: DEFAULT_PHOTO_SRC, fotoPortrait: DEFAULT_PHOTO_SRC, fotoKegiatan: DEFAULT_PHOTO_SRC,
-  labelFoto1: "Pendidikan", labelFoto2: "Pendidikan",
-  input: {
-    mapel: "PJOK dan Informatika",
-    sikapBelajar: "Cukup aktif dan antusias saat kegiatan praktik",
-    positifBelajar: "Mau bertanya dan mudah berbaur dengan teman sekelas",
-    tingkatkanBelajar: "Meningkatkan ketelitian dalam mengerjakan tugas serta mengurangi mengobrol saat jam pelajaran",
-    kegiatanKhusus: "", ekskul: "Futsal", peran: "Aktif bekerja sama dalam tim", catatanPengembangan: "",
-    versiKeagamaan: "perlu_diingatkan", capaianTahfiz: "jilid 4 halaman 18",
-    sholatWajib: "Cukup", dhuha: "Cukup", murojaah: "Cukup", tahfiz: "Baik", shaum: "Baik",
-    kegiatanKeagamaan: "", peranMuhadhoroh: "", perluDibina: "Menjaga ketertiban saat salat berjamaah, dzikir, dan murojaah",
-    prestasi: "", lomba: "", tingkatLomba: "",
-    sakit: "0", izin: "0", alfa: "0", terlambat: "Tidak ada", tglTerlambat: "", disiplinUmum: "Cukup baik",
-    kelebihan: "Mudah bergaul dan bersemangat dalam kegiatan olahraga",
-    dikembangkan: "Meningkatkan kedisiplinan dan ketertiban saat mengikuti kegiatan ibadah maupun pembelajaran di kelas",
-    kegiatanSkip: ["k4", "k5"], kegiatanKeagamaanSkip: ["ka2"]
-  },
-  final: {
-    akademik: [
-      "Dalam bidang akademik, Alhamdulillah Ananda Baim menunjukkan perkembangan yang positif serta sikap belajar yang patut diapresiasi. Ananda terlihat cukup aktif dan antusias saat kegiatan praktik, serta memiliki ketertarikan yang baik terutama pada mata pelajaran PJOK dan Informatika. Hal positif yang tampak dari diri Ananda adalah kemauannya untuk bertanya serta kemudahannya dalam berbaur dengan teman sekelas.",
-      "Namun demikian, berdasarkan pengamatan Bapak/Ibu guru, Ananda masih perlu meningkatkan ketelitian dalam mengerjakan tugas serta mengurangi mengobrol saat jam pelajaran agar pemahaman materi dapat diperoleh secara lebih utuh. Ke depannya, kami berharap Ananda Baim dapat lebih fokus dalam belajar sehingga potensi akademiknya dapat berkembang secara lebih optimal."
-    ],
-    nonAkademik: [
-      "Dalam bidang non-akademik dan pengembangan diri, Ananda Baim turut berpartisipasi dengan baik dalam berbagai agenda sekolah, yaitu *AEP (Al Fakhir Enrichment Program)* pada tanggal 18–22 Juli 2026, kegiatan Debat OSIS pada tanggal 3 Agustus 2026, serta memberikan suara pada Pemilihan Ketua & Wakil OSIS pada tanggal 7 Agustus 2026.",
-      "Untuk menyalurkan minat dan bakatnya, Ananda mengikuti kegiatan ekstrakurikuler Futsal dengan penuh semangat. Dalam setiap aktivitas yang diikuti, Ananda mampu bekerja sama dengan baik di dalam tim. Semoga Ananda Baim senantiasa bersemangat dalam mengembangkan bakat dan kemampuannya secara positif."
-    ],
-    keagamaan: [
-      "Pada aspek keagamaan dan pembinaan karakter, Ananda mengikuti kegiatan buka puasa bersama pada tanggal 17 September. Dalam pelaksanaan salat berjamaah, dzikir, dan murojaah, Ananda terkadang masih terlihat bercanda atau mengobrol dengan teman, serta perlu diingatkan agar segera menuju aula atau musala ketika waktu kegiatan tiba. Ke depannya, Ananda diharapkan dapat lebih menjaga ketertiban, meningkatkan kedisiplinan, dan mengikuti kegiatan keagamaan dengan lebih khusyuk. Dalam pembelajaran Tahfiz/Tahsin, progres Ananda saat ini telah mencapai jilid 4 halaman 18. Semoga Ananda dapat terus memperbaiki kebiasaan tersebut dan meningkatkan semangat serta konsistensi dalam beribadah dan belajar membaca Al-Qur'an."
-    ],
-    prestasi: [],
-    kedisiplinan: [
-      "Dalam aspek kehadiran dan kedisiplinan, Alhamdulillah Ananda menunjukkan komitmen kehadiran yang sangat baik dengan hadir penuh tanpa catatan sakit, izin, alfa, maupun keterlambatan. Secara umum, kedisiplinan Ananda di sekolah tergolong cukup baik. Semoga Ananda Baim dapat terus mempertahankan konsistensi kehadiran ini serta meningkatkan ketertiban dalam setiap aktivitas di sekolah."
-    ],
-    kesimpulan: [
-      "Secara keseluruhan, Alhamdulillah Ananda Baim merupakan siswa yang memiliki potensi positif, di mana sikapnya yang mudah bergaul dan bersemangat dalam kegiatan olahraga menjadi kelebihan yang menonjol dalam kesehariannya di sekolah.",
-      "Ke depannya, Ananda diharapkan dapat lebih meningkatkan kedisiplinan dan ketertiban saat mengikuti kegiatan ibadah maupun pembelajaran di kelas. Dengan bimbingan yang berkesinambungan serta kerja sama yang harmonis antara guru di sekolah dan Ayah/Bunda di rumah, kami optimis Ananda Baim dapat tumbuh menjadi pribadi yang semakin tertib, berakhlak mulia, dan berprestasi."
-    ]
-  }
-};
+/* ================= Navigasi Dua Ruang Kelas Utama ================= */
+function renderClassNav() {
+  const bIbnu = $("#btnNavIbnu");
+  const bUmar = $("#btnNavUmar");
+  if (!bIbnu || !bUmar) return;
+
+  const isIbnu = S.activeClass === "ibnu_khaldun_1";
+  bIbnu.classList.toggle("active", isIbnu);
+  bIbnu.setAttribute("aria-current", isIbnu ? "page" : "false");
+  bUmar.classList.toggle("active", !isIbnu);
+  bUmar.setAttribute("aria-current", !isIbnu ? "page" : "false");
+
+  const countIbnu = S.classes.ibnu_khaldun_1?.students?.length || 0;
+  const countUmar = S.classes.umar_bin_khattab_1?.students?.length || 0;
+
+  const tplIbnu = S.classes.ibnu_khaldun_1?.kelas?.templateId ? (T.list.find((t) => t.id === S.classes.ibnu_khaldun_1.kelas.templateId)?.nama || "Desain Canva Khusus") : "Desain Canva Khusus";
+  const tplUmar = S.classes.umar_bin_khattab_1?.kelas?.templateId ? (T.list.find((t) => t.id === S.classes.umar_bin_khattab_1.kelas.templateId)?.nama || "Desain Canva Khusus") : "Desain Canva Khusus";
+
+  const chipI = $("#chipIbnuCount"); if (chipI) chipI.textContent = `${countIbnu} Siswa`;
+  const chipU = $("#chipUmarCount"); if (chipU) chipU.textContent = `${countUmar} Siswa`;
+  const tplI = $("#chipIbnuTpl"); if (tplI) tplI.textContent = tplIbnu.length > 22 ? tplIbnu.slice(0, 20) + "…" : tplIbnu;
+  const tplU = $("#chipUmarTpl"); if (tplU) tplU.textContent = tplUmar.length > 22 ? tplUmar.slice(0, 20) + "…" : tplU;
+}
+
+function switchClass(targetId) {
+  if (!S.classes[targetId]) return;
+  if (S.activeClass === targetId) return;
+
+  // Simpan data tertunda kelas saat ini jika ada
+  flush("kelas");
+  if (S.sel) flush(S.sel);
+
+  S.activeClass = targetId;
+  lsWrite();
+  render();
+  toast(`🏛️ Beralih ke ruang kerja ${S.classes[targetId].namaMenu} (${S.classes[targetId].subJudul})`);
+}
 
 /* ================= Render: kerangka ================= */
 function render() {
   const main = $("#main");
   const hasKelas = !!S.kelas;
+  renderClassNav();
+  const currentClassTitle = S.activeClass === "ibnu_khaldun_1" ? "Kelas Ibnu Khaldun 1" : "Kelas Umar Bin Khattab 1";
   $("#btnKelas").hidden = !hasKelas;
+  const bkSpan = $("#btnKelas").querySelector("span");
+  if (bkSpan) bkSpan.textContent = `Pengaturan ${S.activeClass === "ibnu_khaldun_1" ? "Ibnu Khaldun 1" : "Umar 1"}`;
   $("#btnDelStuMenu").hidden = !hasKelas;
   $("#btnUploadCanva").hidden = !hasKelas;
+  const upSpan = $("#btnUploadCanva").querySelector("span");
+  if (upSpan) upSpan.textContent = `Upload Desain Canva (${S.activeClass === "ibnu_khaldun_1" ? "Ibnu Khaldun" : "Umar"})`;
   $("#btnTpl").hidden = !hasKelas;
   $("#btnAllAI").hidden = !hasKelas || !S.students.length;
   $("#btnAllAI").disabled = false;
-  $("#btnAllAI").title = "Susun narasi laporan untuk seluruh siswa";
+  $("#btnAllAI").title = `Susun narasi laporan untuk seluruh siswa ${currentClassTitle}`;
   $("#btnZip").hidden = !hasKelas || !S.students.length;
-  $("#sub").textContent = hasKelas ? `${S.kelas.namaKelas || "Kelas"} · ${S.kelas.periode ? S.kelas.periode + " " + (S.kelas.tahun || "") : "periode belum diisi"} · ${activeTplMeta().nama}` : "Belum ada kelas";
+  $("#sub").textContent = hasKelas ? `${currentClassTitle} · ${S.kelas.namaKelas || "Kelas"} · ${S.kelas.periode ? S.kelas.periode + " " + (S.kelas.tahun || "") : "periode belum diisi"} · ${activeTplMeta().nama}` : "Belum ada kelas";
   if (!hasKelas) { main.replaceChildren(h(`<div class="panel empty">
-      <h2>Atur kelas Anda dulu</h2>
+      <h2>Atur ${esc(currentClassTitle)} Anda dulu</h2>
       <p>Isi nama kelas, periode, wali kelas, dan daftar kegiatan umum bulan ini. Kegiatan umum cukup diisi sekali untuk seluruh siswa.</p>
-      <div class="row"><button class="btn primary" id="eNew">Atur kelas</button><button class="btn" id="eDemo">Pakai contoh Kelas 9 Umar Bin Khatab</button></div>
+      <div class="row"><button class="btn primary" id="eNew">Atur kelas</button><button class="btn" id="eDemo">${S.activeClass === "ibnu_khaldun_1" ? "Pakai contoh Kelas 7 Ibnu Khaldun" : "Pakai contoh Kelas 9 Umar Bin Khatab"}</button></div>
     </div>`));
     $("#eNew").onclick = () => openKelas(true);
-    $("#eDemo").onclick = async () => { S.kelas = structuredClone(CONTOH_KELAS); queueSave("kelas"); await addStudent(structuredClone(CONTOH_SISWA)); };
+    $("#eDemo").onclick = async () => {
+      if (S.activeClass === "ibnu_khaldun_1") {
+        S.kelas = structuredClone(CONTOH_KELAS_IBNU_KHALDUN);
+        queueSave("kelas");
+        await addStudent(structuredClone(CONTOH_SISWA_AKBAR));
+      } else {
+        S.kelas = structuredClone(CONTOH_KELAS_UMAR);
+        queueSave("kelas");
+        await addStudent(structuredClone(CONTOH_SISWA_FAIQAH));
+      }
+    };
     return;
   }
   main.replaceChildren(h(`<div>
@@ -5033,7 +5487,7 @@ function openKelas(isNew) {
       <div class="f"><label for="k_periode">Bulan laporan</label><input type="text" id="k_periode" value="${esc(k.periode)}" placeholder="Oktober"><span class="hint">Muncul di banner atas PDF & paragraf pembuka: "…selama bulan ${esc(k.periode || "Oktober")}…"</span></div>
       <div class="f"><label for="k_tahun">Tahun</label><input type="text" inputmode="numeric" id="k_tahun" value="${esc(k.tahun || (k.tanggalCetak || "").slice(0, 4))}" placeholder="2026"></div>
       <div class="f"><label for="k_sapaan">Penulisan sapaan</label><select id="k_sapaan"><option value="Ananda" ${(k.sapaan || "Ananda") === "Ananda" ? "selected" : ""}>Ananda (kapital)</option><option value="ananda" ${k.sapaan === "ananda" ? "selected" : ""}>ananda (huruf kecil)</option></select></div>
-      <div class="f"><label for="k_tpl">Desain PDF</label><select id="k_tpl">${[BUILTIN, ...T.list].map((t) => `<option value="${t.id}" ${(k.templateId || "builtin") === t.id ? "selected" : ""}>${esc(t.nama)}</option>`).join("")}</select><span class="hint">Unggah desain baru lewat menu Desain PDF.</span></div>
+      <div class="f"><label for="k_tpl">Desain PDF</label><select id="k_tpl">${[getBuiltinForClass(S.activeClass), ...T.list.filter((t) => t.classId === S.activeClass)].map((t) => `<option value="${t.id}" ${(k.templateId || getBuiltinForClass(S.activeClass).id) === t.id ? "selected" : ""}>${esc(t.nama)}</option>`).join("")}</select><span class="hint">Desain terpisah khusus untuk ruang kelas ini. Unggah desain baru lewat menu Desain PDF.</span></div>
       <div class="f"><label for="k_kota">Kota</label><input type="text" id="k_kota" value="${esc(k.kota)}"></div>
       <div class="f"><label for="k_tgl">Tanggal cetak</label><input type="date" id="k_tgl" value="${esc(k.tanggalCetak)}"></div>
       <div class="f"><label for="k_lblFoto1">🏷️ Default Keterangan Bawah Frame Foto 1</label><input type="text" id="k_lblFoto1" value="${esc(k.labelFoto1 !== undefined ? k.labelFoto1 : "Pendidikan")}" placeholder="mis. Pendidikan / Kegiatan"><span class="hint">Teks default kapsul di bawah foto kiri (bisa diubah manual per siswa).</span></div>
@@ -5133,31 +5587,23 @@ $("#btnUploadCanva").onclick = () => openUploadCanvaModal();
 $("#btnTpl").onclick = () => openTemplates();
 $("#btnAllAI").onclick = () => runAI(S.students);
 $("#btnZip").onclick = downloadZip;
+
+const navIbnuBtn = $("#btnNavIbnu");
+if (navIbnuBtn) navIbnuBtn.onclick = () => switchClass("ibnu_khaldun_1");
+const navUmarBtn = $("#btnNavUmar");
+if (navUmarBtn) navUmarBtn.onclick = () => switchClass("umar_bin_khattab_1");
+
 (async () => {
-  try { await loadAll(); await loadTemplates(); } catch (e) { toast("Data gagal dimuat: " + (e?.message || e?.code)); }
-  if (!S.kelas && !S.students.length) {
-    S.kelas = structuredClone(CONTOH_KELAS);
-    const demoStu1 = { id: "s_" + rid(), urut: Date.now(), ...structuredClone(CONTOH_SISWA) };
-    const demoStu2 = { id: "s_" + rid(), urut: Date.now() + 1, ...structuredClone(CONTOH_SISWA_BAIM) };
-    S.students = [demoStu1, demoStu2];
-    S.tab = "pratinjau";
-    lsWrite();
-  } else if (S.kelas?.namaKelas === "VII - Ibnu Khaldun" && S.students.length > 0 && S.students.every((x) => x.contoh)) {
-    S.kelas = structuredClone(CONTOH_KELAS);
-    const demoStu1 = { id: S.students[0]?.id || ("s_" + rid()), urut: S.students[0]?.urut || Date.now(), ...structuredClone(CONTOH_SISWA) };
-    const demoStu2 = { id: S.students[1]?.id || ("s_" + rid()), urut: S.students[1]?.urut || (Date.now() + 1), ...structuredClone(CONTOH_SISWA_BAIM) };
-    S.students = [demoStu1, demoStu2];
-    S.tab = "pratinjau";
-    lsWrite();
+  try {
+    await loadAll();
+    await loadTemplates();
+  } catch (e) {
+    toast("Data gagal dimuat: " + (e?.message || e?.code));
   }
-  if (S.kelas && !S.kelas.kegiatanKeagamaan) {
-    S.kelas.kegiatanKeagamaan = structuredClone(CONTOH_KELAS.kegiatanKeagamaan);
-  }
-  S.sel = S.students[0]?.id || null;
   setSaveState(S.mode === "db" ? "Tersimpan" : "");
   render();
 })();
-window.__app = { S, T, pdfBlob, buildPages, buildPrompt, addStudent, deleteStudentsByIds, openDeleteStudentsModal, saveTemplate, newTemplate, openEditor, openTemplates, openUploadCanvaModal, CONTOH_KELAS, CONTOH_SISWA, CONTOH_SISWA_BAIM };
+window.__app = { S, T, switchClass, pdfBlob, buildPages, buildPrompt, addStudent, deleteStudentsByIds, openDeleteStudentsModal, saveTemplate, newTemplate, openEditor, openTemplates, openUploadCanvaModal, CONTOH_KELAS_IBNU_KHALDUN, CONTOH_KELAS_UMAR, CONTOH_SISWA_AKBAR, CONTOH_SISWA_FAIQAH, CONTOH_SISWA_BAIM };
 </script>
 </body>
 </html>
