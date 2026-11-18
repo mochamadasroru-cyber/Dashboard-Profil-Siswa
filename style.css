@@ -2489,3 +2489,11 @@ button, input, select, textarea {
   color: var(--accent-deep);
 }
 
+
+/* Drag and drop glowing state for student photo card */
+.stu-photo-card.dragover {
+  border-color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 8px 24px rgba(13, 138, 82, 0.18) !important;
+  transform: translateY(-2px);
+}

@@ -205,7 +205,6 @@ const CONTOH_SISWA_AKBAR = {
   fotoKegiatan: DEFAULT_PHOTO_SRC,
   labelFoto1: "Muhadoroh",
   labelFoto2: "Lomba bulan bahasa",
-  labelFoto2: "Pendidikan",
   input: {
     kategoriAkademik: "Sangat baik",
     mapel: "Bahasa Indonesia, PAI, IPA, dan Bahasa Inggris",
@@ -273,8 +272,7 @@ const CONTOH_KELAS_UMAR = {
   templateId: "builtin_umar",
   fotoBersama: "",
   ttd: DEFAULT_TTD_SRC,
-  labelFoto1: "Muhadoroh",
-  labelFoto2: "Lomba bulan bahasa",
+  labelFoto1: "Pendidikan",
   labelFoto2: "Pendidikan",
   kegiatan: [
     { id: "k1", nama: "sarapan sehat", tanggal: "9 September" },
@@ -1221,15 +1219,22 @@ function setPhotoCaption(s, keyOrIdx, val) {
 function getTemplatePhotoFrames(tpl, s) {
   if (!tpl || tpl.builtin) {
     const isIbnu = (tpl?.id === "builtin_ibnu" || (S.activeClass === "ibnu_khaldun_1" && (!tpl || tpl.id === "builtin_ibnu")));
-    const baseFrames = isIbnu ? [
+    let baseFrames = isIbnu ? [
       { id: "bf1", num: 1, key: "foto1", src: "foto1", label: "Foto 1 (Polaroid Kiri)", page: "first", shape: "rounded", x: 22.0, y: 21.2, w: 41.5, h: 40.5, border: "#ffffff", borderW: 1.2 },
       { id: "bf2", num: 2, key: "foto2", src: "foto2", label: "Foto 2 (Polaroid Kanan)", page: "first", shape: "rounded", x: 78.5, y: 21.2, w: 41.5, h: 40.5, border: "#ffffff", borderW: 1.2 },
     ] : [
       { id: "bf1", num: 1, key: "foto1", src: "foto1", label: "Foto 1 (Awan Kiri)", page: "first", shape: "cloud", x: 89.2, y: 25.5, w: 53.2, h: 49.8, border: "#a27e8a", borderW: 0.9 },
       { id: "bf2", num: 2, key: "foto2", src: "foto2", label: "Foto 2 (Awan Kanan)", page: "first", shape: "cloud", x: 148.8, y: 24.5, w: 53.2, h: 49.8, border: "#a27e8a", borderW: 0.9 },
     ];
+    if (Array.isArray(S.kelas?.layoutFrames) && S.kelas.layoutFrames.length) {
+      baseFrames = S.kelas.layoutFrames.map((kf, idx) => ({ ...(baseFrames[idx] || baseFrames[0]), ...kf }));
+    }
+    const studentFrames = Array.isArray(s?.layout?.frames) ? s.layout.frames : null;
+    if (studentFrames && studentFrames.length) {
+      return studentFrames.map((sf, idx) => ({ ...(baseFrames[idx] || baseFrames[0] || {}), ...sf }));
+    }
     return baseFrames.map((b, idx) => {
-      const ov = Array.isArray(s?.layout?.frames) ? (s.layout.frames.find((f) => f.id === b.id) || s.layout.frames[idx]) : s?.layout?.frames?.[b.id];
+      const ov = s?.layout?.frames?.[b.id];
       return ov ? { ...b, ...ov } : b;
     });
   }
@@ -1450,18 +1455,6 @@ async function resolveTpl(meta) {
     }
     return meta;
   }
-  if (meta.id === "builtin_ibnu") {
-    return { ...meta, bgFirstSrc: CANVA_IBNU_PAGES.first, bgNextSrc: CANVA_IBNU_PAGES.next };
-  }
-  if (meta.builtin) return meta;
-  if (meta.id === "builtin_ibnu") {
-    return { ...meta, bgFirstSrc: CANVA_IBNU_PAGES.first, bgNextSrc: CANVA_IBNU_PAGES.next };
-  }
-  if (meta.builtin) return meta;
-  if (meta.id === "builtin_ibnu") {
-    return { ...meta, bgFirstSrc: CANVA_IBNU_PAGES.first, bgNextSrc: CANVA_IBNU_PAGES.next };
-  }
-  if (meta.builtin) return meta;
   const [f, n] = await Promise.all([meta.bg?.first ? getTplImage(`${meta.id}_first`) : null, meta.bg?.next ? getTplImage(`${meta.id}_next`) : null]);
   return { ...meta, bgFirstSrc: f, bgNextSrc: n };
 }
@@ -3544,22 +3537,71 @@ function drawInteractiveFrameCanvas(cv, img, frameMeta, cfgIn, opts = {}) {
 async function openPhotoCropperModal(s, pKey, onDone) {
   const normKey = normalizePhotoKey(pKey);
   const pSrc = getStudentPhoto(s, normKey);
+  const activeMeta = activeTplMeta();
+  const frames = getTemplatePhotoFrames(activeMeta, s);
+  const slotIdx = normKey === "foto1" ? 0 : normKey === "foto2" ? 1 : 2;
+  const frameMeta = frames[slotIdx] || frames[0] || { shape: "cloud", w: 53.2, h: 49.8, border: "#a27e8a", label: `Foto ${slotIdx + 1}` };
+
+  // Jika belum ada foto, tampilkan popup upload foto langsung tanpa error
   if (!pSrc) {
-    toast("Pilih / unggah foto terlebih dahulu.");
+    const el = h(`<div class="overlay" role="dialog" aria-modal="true" aria-label="Upload Foto Siswa">
+      <div class="dialog" style="width:min(500px,100%);text-align:center;padding:26px 22px">
+        <div style="font-size:42px;margin-bottom:8px">📷</div>
+        <h3 style="margin:0 0 6px">Upload Foto Siswa (${esc(frameMeta.label || `Foto ${slotIdx + 1}`)})</h3>
+        <p style="margin:0 0 18px;font-size:13px;color:var(--muted)">Belum ada foto yang dipasang. Silakan pilih atau jatuhkan file foto siswa dari komputer/HP Anda.</p>
+        <div class="canva-dropzone" id="pcEmptyDrop" style="margin-bottom:18px;padding:28px 16px;border:2px dashed var(--accent);border-radius:10px;background:var(--accent-soft);cursor:pointer">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);margin-bottom:8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div style="font-weight:700;color:var(--fg-heading);font-size:14px">Tarik & Jatuhkan Foto Siswa ke Sini</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">Format JPG / PNG / WebP</div>
+          <input type="file" accept="image/*" id="pcEmptyFileInput" style="display:none">
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn sm" id="pcEmptyCancel" type="button">Batal</button>
+          <span class="btn sm primary file-btn"><span>📁 Pilih File Foto…</span><input type="file" accept="image/*" id="pcEmptyFileBtn"></span>
+        </div>
+      </div>
+    </div>`);
+    document.body.append(el);
+    const close = () => el.remove();
+    $("#pcEmptyCancel", el).onclick = close;
+    const drop = $("#pcEmptyDrop", el);
+    const fInp = $("#pcEmptyFileInput", el);
+    const fBtn = $("#pcEmptyFileBtn", el);
+    drop.onclick = () => fInp.click();
+    drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("dragover"); };
+    drop.ondragleave = () => drop.classList.remove("dragover");
+    drop.ondrop = (e) => {
+      e.preventDefault();
+      drop.classList.remove("dragover");
+      const f = e.dataTransfer?.files?.[0];
+      if (f) handleInitialFile(f);
+    };
+    const handleInitialFile = async (file) => {
+      try {
+        const imgData = await readImage(file, 1200);
+        setStudentPhoto(s, normKey, imgData);
+        const upImg = await loadImg(imgData);
+        const smartCfg = computeSmartPortraitOffset(upImg, frameMeta.w || 53.2, frameMeta.h || 49.8, 0);
+        setPhotoCfg(s, normKey, smartCfg);
+        touch(s);
+        close();
+        if (onDone) onDone();
+        openPhotoCropperModal(s, normKey, onDone);
+        toast("✅ Foto berhasil diunggah!");
+      } catch (err) { toast(err.message || err); }
+    };
+    fInp.onchange = (e) => { if (e.target.files?.[0]) handleInitialFile(e.target.files[0]); };
+    fBtn.onchange = (e) => { if (e.target.files?.[0]) handleInitialFile(e.target.files[0]); };
     return;
   }
+
   const img = await loadImg(pSrc);
   if (!img) {
     toast("Gambar tidak dapat dimuat.");
     return;
   }
 
-  const activeMeta = activeTplMeta();
-  const frames = getTemplatePhotoFrames(activeMeta, s);
-  const slotIdx = normKey === "foto1" ? 0 : normKey === "foto2" ? 1 : 2;
-  const frameMeta = frames[slotIdx] || frames[0] || { shape: "cloud", w: 53.2, h: 49.8, border: "#a27e8a", label: `Foto ${slotIdx + 1}` };
   let draftCaption = getPhotoCaption(s, normKey);
-
   const origCfg = structuredClone(getPhotoCfg(s, normKey));
   const draft = structuredClone(origCfg);
   const isPortraitImg = img.height > img.width * 1.08;
@@ -3573,13 +3615,17 @@ async function openPhotoCropperModal(s, pKey, onDone) {
             Klik & tahan foto lalu <b>geser dengan kursor mouse</b> untuk mengatur bagian foto yang tampil di dalam <b>${esc(frameMeta.label || "Frame Foto")} (${SHAPES[frameMeta.shape] || "Awan"})</b>. Gunakan scroll mouse atau slider untuk memperbesar/memperkecil.
           </p>
         </div>
-        <div style="display:flex;gap:6px;flex:none">
+        <div style="display:flex;gap:6px;flex:none;align-items:center">
+          <span class="btn sm file-btn" style="background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700">
+            <span>📁 Ganti Foto Lain</span>
+            <input type="file" accept="image/*" id="pcUploadNew">
+          </span>
           <button class="btn sm" id="pcCancelTop" type="button">Batal</button>
           <button class="btn sm ghost danger" id="pcExitTop" type="button">✕ Keluar</button>
         </div>
       </div>
 
-      <div class="canva-crop-layout">
+            <div class="canva-crop-layout">
         <!-- Area Kanvas Interaktif Kiri -->
         <div class="canva-crop-viewport" id="pcViewport" title="Klik dan seret kursor mouse untuk menggeser foto · Scroll untuk zoom">
           <canvas id="pcCanvas" width="640" height="500"></canvas>
@@ -3719,6 +3765,22 @@ async function openPhotoCropperModal(s, pKey, onDone) {
 
   syncControls();
   repaint();
+
+  const upNew = $("#pcUploadNew", el);
+  if (upNew) {
+    upNew.onchange = async () => {
+      const file = upNew.files?.[0]; if (!file) return;
+      try {
+        const imgData = await readImage(file, 1200);
+        setStudentPhoto(s, normKey, imgData);
+        touch(s);
+        close();
+        if (onDone) onDone();
+        openPhotoCropperModal(s, normKey, onDone);
+        toast("✅ Foto baru berhasil dimuat!");
+      } catch (e) { toast(e.message); }
+    };
+  }
 
   // Drag-to-pan dengan kursor mouse / sentuhan seperti Canva
   vp.addEventListener("pointerdown", (ev) => {
@@ -4310,6 +4372,43 @@ function renderForm(body, s) {
     touch(s);
     renderForm(body, s);
   });
+
+  // Drag & drop upload langsung pada kartu foto siswa
+  body.querySelectorAll(".stu-photo-card").forEach((card) => {
+    const k = card.dataset.photocard;
+    if (!k) return;
+    card.addEventListener("dragover", (ev) => {
+      ev.preventDefault();
+      card.classList.add("dragover");
+    });
+    card.addEventListener("dragleave", () => {
+      card.classList.remove("dragover");
+    });
+    card.addEventListener("drop", async (ev) => {
+      ev.preventDefault();
+      card.classList.remove("dragover");
+      const file = ev.dataTransfer?.files?.[0];
+      if (!file || !file.type.startsWith("image/")) {
+        toast("Harap jatuhkan file gambar (JPG/PNG).");
+        return;
+      }
+      try {
+        const imgData = await readImage(file, 1200);
+        setStudentPhoto(s, k, imgData);
+        const uploadedImg = await loadImg(imgData);
+        const idx = k === "foto1" ? 0 : k === "foto2" ? 1 : 2;
+        const fm = frames[idx] || frames[0] || { w: 53.2, h: 49.8 };
+        const smartCfg = computeSmartPortraitOffset(uploadedImg, fm.w, fm.h, 0);
+        setPhotoCfg(s, k, smartCfg);
+        touch(s);
+        renderForm(body, s);
+        openPhotoCropperModal(s, k, () => renderForm(body, s));
+        toast("✅ Foto berhasil diunggah!");
+      } catch (err) {
+        toast("Gagal memproses foto: " + (err.message || err));
+      }
+    });
+  });
   const btnGoFrames = $("#btnGoToFramesTab", body);
   if (btnGoFrames) btnGoFrames.onclick = () => {
     S.tab = "pratinjau";
@@ -4567,6 +4666,10 @@ async function renderPreview(body, s) {
                 </div>
               </div>
               <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                <span class="btn sm file-btn" style="padding:4px 9px;font-size:12px;background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700">
+                  <span>📁 ${pSrc ? "Ganti Foto" : "+ Upload Foto"}</span>
+                  <input type="file" accept="image/*" data-pvuphoto="${pKey}" aria-label="Upload Foto ${i + 1}">
+                </span>
                 <button type="button" class="btn sm primary" data-pvcanvacrop="${pKey}" title="Geser & pas-kan posisi foto di dalam frame menggunakan kursor mouse seperti di Canva">✋ Geser & Pas-kan Isi Foto</button>
                 <select class="sm" data-frameprop="src" data-fidx="${i}" aria-label="Isi foto">
                   <option value="foto1" ${f.src === "foto1" || f.src === "portrait" ? "selected" : ""}>Foto 1 (Utama)</option>
@@ -5032,6 +5135,26 @@ async function renderPreview(body, s) {
 
   body.querySelectorAll("[data-pvcanvacrop]").forEach((btn) => {
     btn.onclick = () => openPhotoCropperModal(s, btn.dataset.pvcanvacrop, () => renderPreview(body, s));
+  });
+
+  body.querySelectorAll("[data-pvuphoto]").forEach((el) => {
+    el.onchange = async () => {
+      const file = el.files?.[0]; if (!file) return;
+      try {
+        const k = el.dataset.pvuphoto;
+        const imgData = await readImage(file, 1200);
+        setStudentPhoto(s, k, imgData);
+        const uploadedImg = await loadImg(imgData);
+        const idx = k === "foto1" ? 0 : k === "foto2" ? 1 : 2;
+        const fm = curFrames[idx] || curFrames[0] || { w: 53.2, h: 49.8 };
+        const smartCfg = computeSmartPortraitOffset(uploadedImg, fm.w, fm.h, 0);
+        setPhotoCfg(s, k, smartCfg);
+        touch(s);
+        toast("✅ Foto berhasil diunggah!");
+        renderPreview(body, s);
+        openPhotoCropperModal(s, k, () => renderPreview(body, s));
+      } catch (e) { toast(e.message); }
+    };
   });
 
   body.querySelectorAll("[data-framecaption]").forEach((inpEl) => {
@@ -5653,17 +5776,28 @@ function openKelas(isNew) {
       </div>
     </div>
     <div class="fields" style="padding:0">
-      <div class="f"><label for="k_nama">Nama kelas (judul PDF)</label><input type="text" id="k_nama" value="${esc(k.namaKelas)}" placeholder="9 Umar Bin Khatab"></div>
-      <div class="f"><label for="k_ttd">Kelas di tanda tangan</label><input type="text" id="k_ttd" value="${esc(k.labelTtd)}" placeholder="9 Umar Bin Khatab"></div>
-      <div class="f"><label for="k_wali">Nama wali kelas & gelar</label><input type="text" id="k_wali" value="${esc(k.waliKelas)}" placeholder="Syarifatu Zahro, S.Pd"></div>
+      <div class="f"><label for="k_nama">Nama kelas (judul PDF)</label><input type="text" id="k_nama" value="${esc(k.namaKelas)}" placeholder="${S.activeClass === "ibnu_khaldun_1" ? "7 Ibnu Khaldun" : "9 Umar Bin Khatab"}"></div>
+      <div class="f"><label for="k_ttd">Kelas di tanda tangan</label><input type="text" id="k_ttd" value="${esc(k.labelTtd)}" placeholder="${S.activeClass === "ibnu_khaldun_1" ? "7 Ibnu Khaldun" : "9 Umar Bin Khatab"}"></div>
+      <div class="f"><label for="k_wali">Nama wali kelas & gelar</label><input type="text" id="k_wali" value="${esc(k.waliKelas)}" placeholder="${S.activeClass === "ibnu_khaldun_1" ? "Mochamad Asroru P, S.Pd, G.r" : "Syarifatu Zahro, S.Pd"}"></div>
       <div class="f"><label for="k_periode">Bulan laporan</label><input type="text" id="k_periode" value="${esc(k.periode)}" placeholder="Oktober"><span class="hint">Muncul di banner atas PDF & paragraf pembuka: "…selama bulan ${esc(k.periode || "Oktober")}…"</span></div>
       <div class="f"><label for="k_tahun">Tahun</label><input type="text" inputmode="numeric" id="k_tahun" value="${esc(k.tahun || (k.tanggalCetak || "").slice(0, 4))}" placeholder="2026"></div>
       <div class="f"><label for="k_sapaan">Penulisan sapaan</label><select id="k_sapaan"><option value="Ananda" ${(k.sapaan || "Ananda") === "Ananda" ? "selected" : ""}>Ananda (kapital)</option><option value="ananda" ${k.sapaan === "ananda" ? "selected" : ""}>ananda (huruf kecil)</option></select></div>
       <div class="f"><label for="k_tpl">Desain PDF</label><select id="k_tpl">${[getBuiltinForClass(S.activeClass), ...T.list.filter((t) => t.classId === S.activeClass)].map((t) => `<option value="${t.id}" ${(k.templateId || getBuiltinForClass(S.activeClass).id) === t.id ? "selected" : ""}>${esc(t.nama)}</option>`).join("")}</select><span class="hint">Desain terpisah khusus untuk ruang kelas ini. Unggah desain baru lewat menu Desain PDF.</span></div>
       <div class="f"><label for="k_kota">Kota</label><input type="text" id="k_kota" value="${esc(k.kota)}"></div>
       <div class="f"><label for="k_tgl">Tanggal cetak</label><input type="date" id="k_tgl" value="${esc(k.tanggalCetak)}"></div>
-      <div class="f"><label for="k_lblFoto1">🏷️ Default Keterangan Bawah Frame Foto 1</label><input type="text" id="k_lblFoto1" value="${esc(k.labelFoto1 !== undefined ? k.labelFoto1 : "Pendidikan")}" placeholder="mis. Pendidikan / Kegiatan"><span class="hint">Teks default kapsul di bawah foto kiri (bisa diubah manual per siswa).</span></div>
-      <div class="f"><label for="k_lblFoto2">🏷️ Default Keterangan Bawah Frame Foto 2</label><input type="text" id="k_lblFoto2" value="${esc(k.labelFoto2 !== undefined ? k.labelFoto2 : "Pendidikan")}" placeholder="mis. Pendidikan / Kegiatan"><span class="hint">Teks default kapsul di bawah foto kanan (bisa diubah manual per siswa).</span></div>
+      <div class="f wide" style="background:var(--surface-2);border:1.5px solid var(--line-strong);border-radius:10px;padding:12px 14px;margin-top:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+          <div>
+            <b style="font-size:13px;color:var(--fg-heading)">🖼️ Pengaturan Frame Foto Kelas (${S.activeClass === "ibnu_khaldun_1" ? "Desain Buku Spiral - Frame Polaroid" : "Desain Awan Pastel - Frame Awan"})</b>
+            <div style="font-size:11.5px;color:var(--muted)">Atur teks default keterangan kapsul di bawah frame foto untuk semua siswa di kelas ini.</div>
+          </div>
+          <button class="btn sm" id="kGoToFrames" type="button" style="background:#fff">📐 Letak Frame di Pratinjau →</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="f" style="margin:0"><label for="k_lblFoto1">🏷️ Default Keterangan Foto 1 (Kiri / Utama)</label><input type="text" id="k_lblFoto1" value="${esc(k.labelFoto1 !== undefined ? k.labelFoto1 : (S.activeClass === "ibnu_khaldun_1" ? "Muhadoroh" : "Pendidikan"))}" placeholder="mis. Muhadoroh / Pendidikan"><span class="hint">Teks bawaan di bawah frame foto 1</span></div>
+          <div class="f" style="margin:0"><label for="k_lblFoto2">🏷️ Default Keterangan Foto 2 (Kanan / Kegiatan)</label><input type="text" id="k_lblFoto2" value="${esc(k.labelFoto2 !== undefined ? k.labelFoto2 : (S.activeClass === "ibnu_khaldun_1" ? "Lomba bulan bahasa" : "Pendidikan"))}" placeholder="mis. Lomba bulan bahasa / Pendidikan"><span class="hint">Teks bawaan di bawah frame foto 2</span></div>
+        </div>
+      </div>
       <div class="photo-row" style="grid-template-columns:1fr">
         <div class="photo"><div class="thumb ${k.ttd ? "has" : ""}" id="k_sgT" style="background-size:contain;${k.ttd ? `background-image:url('${k.ttd}')` : ""}"></div><div class="meta"><span>Tanda tangan wali kelas</span><span class="btn sm file-btn">Pilih gambar<input type="file" accept="image/png,image/*" id="k_sg"></span><span class="hint">PNG latar transparan paling rapi</span></div></div>
       </div>
@@ -5694,6 +5828,15 @@ function openKelas(isNew) {
   $("#kExitTop", el).onclick = close;
   $("#kCancel", el).onclick = close;
   $("#kExit", el).onclick = close;
+  const kGoBtn = $("#kGoToFrames", el);
+  if (kGoBtn) {
+    kGoBtn.onclick = () => {
+      close();
+      S.tab = "pratinjau";
+      pvShowFrames = true;
+      renderWork();
+    };
+  }
   const kegRender = () => {
     const list = $("#kegList", el);
     list.replaceChildren(...k.kegiatan.map((g, i) => {
