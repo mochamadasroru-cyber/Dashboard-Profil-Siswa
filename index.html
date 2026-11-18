@@ -181,7 +181,6 @@ const CONTOH_KELAS_IBNU_KHALDUN = {
   ttd: DEFAULT_TTD_SRC,
   labelFoto1: "Muhadoroh",
   labelFoto2: "Lomba bulan bahasa",
-  labelFoto2: "Pendidikan",
   kegiatan: [
     { id: "ik_k1", nama: "sarapan sehat bersama", tanggal: "8 Oktober" },
     { id: "ik_k2", nama: "Muhadoroh", tanggal: "15 Oktober" },
@@ -1119,10 +1118,14 @@ async function buildPages(s, stage, tplIn) {
   const nameRaw = s.nama || "Nama Siswa", kelasUp = (S.kelas.namaKelas || "Kelas").toUpperCase();
   let l1, l2;
   if (tpl.builtin) {
-    [l1, l2] = await Promise.all([
-      renderHeader({ first: true, name: nameRaw, kelas: kelasUp, student: s, photos: { group: getStudentPhoto(s, "foto3"), portrait: getStudentPhoto(s, "foto1"), activity: getStudentPhoto(s, "foto2") } }),
-      renderHeader({ first: false, name: nameRaw, kelas: kelasUp, student: s }),
-    ]);
+    if (tpl.id === "builtin_ibnu") {
+      [l1, l2] = await Promise.all([renderIbnuLayer(tpl, "first", s), renderIbnuLayer(tpl, "next", s)]);
+    } else {
+      [l1, l2] = await Promise.all([
+        renderHeader({ first: true, name: nameRaw, kelas: kelasUp, student: s, photos: { group: getStudentPhoto(s, "foto3"), portrait: getStudentPhoto(s, "foto1"), activity: getStudentPhoto(s, "foto2") } }),
+        renderHeader({ first: false, name: nameRaw, kelas: kelasUp, student: s }),
+      ]);
+    }
   } else {
     [l1, l2] = await Promise.all([renderLayer(tpl, "first", s), renderLayer(tpl, "next", s)]);
   }
@@ -1217,7 +1220,11 @@ function setPhotoCaption(s, keyOrIdx, val) {
 
 function getTemplatePhotoFrames(tpl, s) {
   if (!tpl || tpl.builtin) {
-    const baseFrames = [
+    const isIbnu = (tpl?.id === "builtin_ibnu" || (S.activeClass === "ibnu_khaldun_1" && (!tpl || tpl.id === "builtin_ibnu")));
+    const baseFrames = isIbnu ? [
+      { id: "bf1", num: 1, key: "foto1", src: "foto1", label: "Foto 1 (Polaroid Kiri)", page: "first", shape: "rounded", x: 22.0, y: 21.2, w: 41.5, h: 40.5, border: "#ffffff", borderW: 1.2 },
+      { id: "bf2", num: 2, key: "foto2", src: "foto2", label: "Foto 2 (Polaroid Kanan)", page: "first", shape: "rounded", x: 78.5, y: 21.2, w: 41.5, h: 40.5, border: "#ffffff", borderW: 1.2 },
+    ] : [
       { id: "bf1", num: 1, key: "foto1", src: "foto1", label: "Foto 1 (Awan Kiri)", page: "first", shape: "cloud", x: 89.2, y: 25.5, w: 53.2, h: 49.8, border: "#a27e8a", borderW: 0.9 },
       { id: "bf2", num: 2, key: "foto2", src: "foto2", label: "Foto 2 (Awan Kanan)", page: "first", shape: "cloud", x: 148.8, y: 24.5, w: 53.2, h: 49.8, border: "#a27e8a", borderW: 0.9 },
     ];
@@ -1265,8 +1272,8 @@ const BUILTIN_UMAR = {
 const BUILTIN_IBNU = {
   id: "builtin_ibnu",
   classId: "ibnu_khaldun_1",
-  nama: "Desain Canva: Profil Siswa 7 Ibnu Khaldun (Buku Spiral)",
-  builtin: false,
+  nama: "Bawaan: Profil Siswa 7 Ibnu Khaldun (Buku Spiral Canva)",
+  builtin: true,
   bg: { first: true, next: true },
   bgFirstSrc: CANVA_IBNU_PAGES.first,
   bgNextSrc: CANVA_IBNU_PAGES.next,
@@ -1275,8 +1282,8 @@ const BUILTIN_IBNU = {
   els: [
     { id: "b1", kind: "body", page: "first", x: 19, y: 78, w: 175, h: 204 },
     { id: "b2", kind: "body", page: "next", x: 19, y: 35, w: 175, h: 210 },
-    { id: "bf1", kind: "foto", page: "first", x: 22, y: 21.2, w: 41.5, h: 40.5, src: "foto1", shape: "rect", border: "transparent", borderW: 0, label: "Foto 1 (Muhadoroh)" },
-    { id: "bf2", kind: "foto", page: "first", x: 78.5, y: 21.2, w: 41.5, h: 40.5, src: "foto2", shape: "rect", border: "transparent", borderW: 0, label: "Foto 2 (Lomba Bulan Bahasa)" },
+    { id: "bf1", kind: "foto", page: "first", x: 22.0, y: 21.2, w: 41.5, h: 40.5, src: "foto1", shape: "rounded", border: "#ffffff", borderW: 1.2, label: "Foto 1 (Polaroid Kiri)" },
+    { id: "bf2", kind: "foto", page: "first", x: 78.5, y: 21.2, w: 41.5, h: 40.5, src: "foto2", shape: "rounded", border: "#ffffff", borderW: 1.2, label: "Foto 2 (Polaroid Kanan)" },
     { id: "nm", kind: "nama", page: "first", x: 133, y: 25, w: 64, h: 42, font: "Lexend", color: "#6a4533", stroke: "transparent", strokeW: 0, shadow: false, align: "center", upper: false, sizePt: 15, hidden: true }
   ]
 };
@@ -1437,7 +1444,12 @@ function activeTplMeta() {
   return found || curBuiltin;
 }
 async function resolveTpl(meta) {
-  if (meta.builtin) return meta;
+  if (meta.builtin) {
+    if (meta.id === "builtin_ibnu") {
+      return { ...meta, bgFirstSrc: CANVA_IBNU_PAGES.first, bgNextSrc: CANVA_IBNU_PAGES.next };
+    }
+    return meta;
+  }
   if (meta.id === "builtin_ibnu") {
     return { ...meta, bgFirstSrc: CANVA_IBNU_PAGES.first, bgNextSrc: CANVA_IBNU_PAGES.next };
   }
@@ -1454,7 +1466,12 @@ async function resolveTpl(meta) {
   return { ...meta, bgFirstSrc: f, bgNextSrc: n };
 }
 function bodyBox(tpl, page, s) {
-  const base = (tpl.els || []).find((e) => e.kind === "body" && e.page === page) || BUILTIN.els[page === "first" ? 0 : 1] || BUILTIN.els[0];
+  const isIbnu = tpl?.id === "builtin_ibnu" || (S.activeClass === "ibnu_khaldun_1" && (!tpl || tpl.id === "builtin_ibnu"));
+  const defaultEls = isIbnu ? [
+    { id: "b1", kind: "body", page: "first", x: 19, y: 78, w: 175, h: 204 },
+    { id: "b2", kind: "body", page: "next", x: 19, y: 35, w: 175, h: 210 }
+  ] : BUILTIN_UMAR.els;
+  const base = (tpl.els || []).find((e) => e.kind === "body" && e.page === page) || defaultEls[page === "first" ? 0 : 1] || defaultEls[0];
   const b = { ...base };
   const ov = s?.layout || {};
   if (page === "first") {
@@ -1505,9 +1522,13 @@ function drawPhotoEl(ctx, img, el, cfg, captionText) {
     ctx.fillText(PHOTO_SRC[el.src]?.split(" ")[1] || "Foto", x + w / 2, y + hh / 2); ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
   }
   ctx.restore();
-  if (el.shape === "cloud" && captionText && String(captionText).trim()) {
-    const sc = w / (53.2 * MM);
-    drawPillBadge(ctx, String(captionText).trim(), x, y + hh - 8.8 * MM * sc, 57.69 * MM * sc, 9.57 * MM * sc);
+  if (captionText && String(captionText).trim()) {
+    const sc = Math.min(1.2, Math.max(0.75, w / (53.2 * MM)));
+    const bw = Math.min(w * 1.05, 57.69 * MM * sc);
+    const bh = 9.57 * MM * sc;
+    const bx = x + (w - bw) / 2;
+    const by = y + hh - (bh * 0.9);
+    drawPillBadge(ctx, String(captionText).trim(), bx, by, bw, bh);
   }
 }
 function drawTextEl(ctx, text, el) {
@@ -1527,6 +1548,69 @@ function drawTextEl(ctx, text, el) {
   ctx.fillStyle = el.color || "#111"; ctx.fillText(t, tx, ty);
   ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
 }
+async function renderIbnuLayer(tpl, page, s) {
+  const cv = document.createElement("canvas"); cv.width = 1588; cv.height = Math.round(297 * MM);
+  const ctx = cv.getContext("2d");
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, cv.width, cv.height);
+  const bg = await loadImg(page === "first" ? CANVA_IBNU_PAGES.first : CANVA_IBNU_PAGES.next);
+  if (bg) ctx.drawImage(bg, 0, 0, cv.width, cv.height);
+
+  if (page === "first") {
+    // Render foto polaroid siswa sesuai konfigurasi posisi frame
+    const frames = getTemplatePhotoFrames(tpl, s);
+    for (let idx = 0; idx < frames.length; idx++) {
+      const f = frames[idx];
+      if (f.page !== "first") continue;
+      const pKey = f.key || (idx === 0 ? "foto1" : idx === 1 ? "foto2" : "foto3");
+      const pSrc = getStudentPhoto(s, pKey);
+      if (pSrc) {
+        const img = await loadImg(pSrc);
+        const cfg = getPhotoCfg(s, pKey);
+        const caption = getPhotoCaption(s, pKey);
+        drawPhotoEl(ctx, img, f, cfg, caption);
+      }
+    }
+
+    // Nama siswa: jika siswa berbeda dengan Akbar Maulana Debianto, patch dan gambar nama dinamis
+    const curNamaEl = { ...(tpl.els?.find((e) => e.kind === "nama") || { x: 133, y: 25, w: 64, h: 42, sizePt: 15, align: "center", hidden: false }), ...(s?.layout?.nama || {}) };
+    if (!curNamaEl.hidden && s && s.nama && s.nama.trim() !== "Akbar Maulana Debianto") {
+      const pxMm = cv.width / 210;
+      ctx.fillStyle = "#faf4df";
+      ctx.fillRect(130 * pxMm, 22 * pxMm, 68 * pxMm, 46 * pxMm);
+      drawTextEl(ctx, s.nama, curNamaEl);
+    }
+  } else {
+    // Halaman 2: Patch tanggal cetak dinamis
+    const k = S.kelas || {};
+    const kota = k.kota || "Depok";
+    const tgl = tanggalIndo(k.tanggalCetak || "2026-10-31");
+    ctx.fillStyle = "#fdfae9";
+    ctx.fillRect(720 * (cv.width / 1191), 1295 * (cv.height / 1684), 330 * (cv.width / 1191), 42 * (cv.height / 1684));
+    ctx.fillStyle = "#2c2520";
+    ctx.font = `500 ${Math.round(24 * (cv.width / 1191))}px "Plus Jakarta Sans", sans-serif`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText(`${kota}, ${tgl}`, 725 * (cv.width / 1191), 1324 * (cv.height / 1684));
+
+    // Render foto jika ada frame di halaman 2
+    const frames = getTemplatePhotoFrames(tpl, s);
+    for (let idx = 0; idx < frames.length; idx++) {
+      const f = frames[idx];
+      if (f.page !== "next") continue;
+      const pKey = f.key || (idx === 0 ? "foto1" : idx === 1 ? "foto2" : "foto3");
+      const pSrc = getStudentPhoto(s, pKey);
+      if (pSrc) {
+        const img = await loadImg(pSrc);
+        const cfg = getPhotoCfg(s, pKey);
+        const caption = getPhotoCaption(s, pKey);
+        drawPhotoEl(ctx, img, f, cfg, caption);
+      }
+    }
+  }
+
+  return cv.toDataURL("image/jpeg", 0.92);
+}
+
 async function renderLayer(tpl, page, s) {
   const cv = document.createElement("canvas"); cv.width = 1588; cv.height = Math.round(297 * MM);
   const ctx = cv.getContext("2d");
@@ -3905,8 +3989,8 @@ function renderForm(body, s) {
       </div>
       ${activeMeta.builtin ? `
       <div class="fields" style="padding:12px 0 0;margin-top:12px;border-top:1px dashed var(--line)">
-        <div class="f"><label for="f_lblFoto1">🏷️ Keterangan Kapsul di Bawah Frame Foto 1 (Awan Kiri)</label><input type="text" id="f_lblFoto1" value="${esc(getPhotoCaption(s, "foto1"))}" placeholder="mis. Pendidikan / Kegiatan / Kosongkan jika tanpa teks"></div>
-        <div class="f"><label for="f_lblFoto2">🏷️ Keterangan Kapsul di Bawah Frame Foto 2 (Awan Kanan)</label><input type="text" id="f_lblFoto2" value="${esc(getPhotoCaption(s, "foto2"))}" placeholder="mis. Pendidikan / Kegiatan / Kosongkan jika tanpa teks"></div>
+        <div class="f"><label for="f_lblFoto1">🏷️ Keterangan Kapsul di Bawah Frame Foto 1 (Foto Kiri / Utama)</label><input type="text" id="f_lblFoto1" value="${esc(getPhotoCaption(s, "foto1"))}" placeholder="mis. Pendidikan / Kegiatan / Kosongkan jika tanpa teks"></div>
+        <div class="f"><label for="f_lblFoto2">🏷️ Keterangan Kapsul di Bawah Frame Foto 2 (Foto Kanan / Kegiatan)</label><input type="text" id="f_lblFoto2" value="${esc(getPhotoCaption(s, "foto2"))}" placeholder="mis. Pendidikan / Kegiatan / Kosongkan jika tanpa teks"></div>
       </div>` : ""}
     </div>`}
 
